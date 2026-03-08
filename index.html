@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CAFinal Pro – Master CA Final</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #12121a;
+    --card: #1a1a26;
+    --border: #2a2a3d;
+    --accent: #f97316;
+    --accent2: #fb923c;
+    --gold: #fbbf24;
+    --text: #f1f1f8;
+    --muted: #8888aa;
+    --gradient: linear-gradient(135deg, #f97316, #ef4444);
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html { scroll-behavior: smooth; }
+  body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; overflow-x: hidden; }
+
+  /* NAV */
+  nav {
+    position: fixed; top: 0; width: 100%; z-index: 100;
+    background: rgba(10,10,15,0.85); backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 5%; height: 68px;
+  }
+  .logo { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.4rem; color: var(--text); text-decoration: none; }
+  .logo span { color: var(--accent); }
+  .nav-links { display: flex; gap: 2rem; list-style: none; }
+  .nav-links a { color: var(--muted); text-decoration: none; font-size: 0.9rem; font-weight: 500; transition: color 0.2s; }
+  .nav-links a:hover { color: var(--text); }
+  .nav-cta { display: flex; gap: 0.75rem; align-items: center; }
+  .btn-ghost { background: transparent; border: 1px solid var(--border); color: var(--text); padding: 0.5rem 1.25rem; border-radius: 8px; cursor: pointer; font-size: 0.85rem; font-family: 'DM Sans', sans-serif; transition: all 0.2s; text-decoration: none; }
+  .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+  .btn-primary { background: var(--gradient); color: white; border: none; padding: 0.5rem 1.25rem; border-radius: 8px; cursor: pointer; font-size: 0.85rem; font-weight: 600; font-family: 'DM Sans', sans-serif; transition: opacity 0.2s; text-decoration: none; }
+  .btn-primary:hover { opacity: 0.88; }
+
+  /* HERO */
+  .hero {
+    min-height: 100vh; display: flex; align-items: center;
+    padding: 100px 5% 60px;
+    position: relative; overflow: hidden;
+  }
+  .hero-bg {
+    position: absolute; inset: 0; z-index: 0;
+    background: radial-gradient(ellipse 80% 60% at 60% 40%, rgba(249,115,22,0.12) 0%, transparent 70%),
+                radial-gradient(ellipse 50% 40% at 20% 80%, rgba(239,68,68,0.07) 0%, transparent 60%);
+  }
+  .hero-grid {
+    position: absolute; inset: 0; z-index: 0;
+    background-image: linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+                      linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+    background-size: 60px 60px;
+  }
+  .hero-content { position: relative; z-index: 1; max-width: 680px; }
+  .badge {
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    background: rgba(249,115,22,0.1); border: 1px solid rgba(249,115,22,0.3);
+    color: var(--accent2); padding: 0.35rem 1rem; border-radius: 100px;
+    font-size: 0.8rem; font-weight: 500; margin-bottom: 1.5rem;
+    animation: fadeUp 0.6s ease both;
+  }
+  .dot { width: 6px; height: 6px; background: var(--accent); border-radius: 50%; animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(1.3)} }
+  h1 {
+    font-family: 'Syne', sans-serif; font-size: clamp(2.6rem, 5vw, 4rem);
+    font-weight: 800; line-height: 1.1; letter-spacing: -0.02em;
+    margin-bottom: 1.25rem;
+    animation: fadeUp 0.7s 0.1s ease both;
+  }
+  h1 .highlight { color: var(--accent); position: relative; display: inline-block; }
+  .hero-sub {
+    font-size: 1.1rem; color: var(--muted); line-height: 1.7;
+    max-width: 520px; margin-bottom: 2.5rem;
+    animation: fadeUp 0.7s 0.2s ease both;
+  }
+  .hero-actions { display: flex; gap: 1rem; flex-wrap: wrap; animation: fadeUp 0.7s 0.3s ease both; }
+  .btn-lg { padding: 0.85rem 2rem; font-size: 1rem; border-radius: 10px; }
+  .hero-stats {
+    display: flex; gap: 2.5rem; margin-top: 3.5rem;
+    animation: fadeUp 0.7s 0.4s ease both;
+  }
+  .stat-item { }
+  .stat-num { font-family: 'Syne', sans-serif; font-size: 1.8rem; font-weight: 700; color: var(--text); }
+  .stat-label { font-size: 0.8rem; color: var(--muted); margin-top: 2px; }
+  .hero-visual {
+    position: absolute; right: 5%; top: 50%; transform: translateY(-50%);
+    width: 380px; z-index: 1;
+    animation: fadeUp 0.8s 0.3s ease both;
+  }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(24px)} to{opacity:1;transform:translateY(0)} }
+
+  /* FLOATING CARD */
+  .float-card {
+    background: var(--card); border: 1px solid var(--border); border-radius: 16px;
+    padding: 1.25rem; margin-bottom: 1rem; position: relative; overflow: hidden;
+  }
+  .float-card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+    background: var(--gradient);
+  }
+  .fc-label { font-size: 0.7rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.5rem; }
+  .fc-title { font-family: 'Syne', sans-serif; font-size: 0.95rem; font-weight: 700; margin-bottom: 0.75rem; }
+  .fc-bar { height: 4px; background: var(--border); border-radius: 2px; margin-bottom: 0.4rem; }
+  .fc-bar-fill { height: 100%; border-radius: 2px; background: var(--gradient); }
+  .fc-chapters { font-size: 0.75rem; color: var(--muted); }
+
+  /* SUBJECTS */
+  .section { padding: 80px 5%; }
+  .section-label { font-size: 0.78rem; color: var(--accent); text-transform: uppercase; letter-spacing: 0.12em; font-weight: 600; margin-bottom: 0.75rem; }
+  .section-title { font-family: 'Syne', sans-serif; font-size: clamp(1.8rem, 3vw, 2.6rem); font-weight: 800; margin-bottom: 1rem; }
+  .section-sub { color: var(--muted); max-width: 500px; line-height: 1.7; margin-bottom: 3rem; }
+
+  .subjects-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.25rem;
+  }
+  .subject-card {
+    background: var(--card); border: 1px solid var(--border); border-radius: 16px;
+    padding: 1.5rem; cursor: pointer; transition: all 0.25s; position: relative; overflow: hidden;
+    text-decoration: none; color: inherit; display: block;
+  }
+  .subject-card:hover { border-color: var(--accent); transform: translateY(-4px); }
+  .subject-card::after {
+    content: ''; position: absolute; inset: 0; opacity: 0;
+    background: radial-gradient(circle at 50% 0%, rgba(249,115,22,0.08), transparent 70%);
+    transition: opacity 0.3s;
+  }
+  .subject-card:hover::after { opacity: 1; }
+  .sc-icon { font-size: 2rem; margin-bottom: 1rem; }
+  .sc-name { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 1rem; margin-bottom: 0.4rem; }
+  .sc-meta { font-size: 0.8rem; color: var(--muted); }
+  .sc-tag {
+    display: inline-block; background: rgba(249,115,22,0.12); color: var(--accent2);
+    font-size: 0.7rem; padding: 0.2rem 0.6rem; border-radius: 4px; margin-top: 0.75rem; font-weight: 500;
+  }
+
+  /* HOW IT WORKS */
+  .steps { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1.5rem; }
+  .step { position: relative; }
+  .step-num {
+    font-family: 'Syne', sans-serif; font-size: 3.5rem; font-weight: 800;
+    color: rgba(249,115,22,0.12); line-height: 1; margin-bottom: 0.75rem;
+  }
+  .step-title { font-family: 'Syne', sans-serif; font-weight: 700; margin-bottom: 0.5rem; }
+  .step-desc { font-size: 0.88rem; color: var(--muted); line-height: 1.7; }
+
+  /* FEATURES */
+  .features-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1.25rem; }
+  .feature-card {
+    background: var(--card); border: 1px solid var(--border); border-radius: 16px;
+    padding: 1.5rem; transition: border-color 0.2s;
+  }
+  .feature-card:hover { border-color: rgba(249,115,22,0.4); }
+  .fi { font-size: 1.5rem; margin-bottom: 1rem; }
+  .ft { font-family: 'Syne', sans-serif; font-weight: 700; margin-bottom: 0.5rem; }
+  .fd { font-size: 0.85rem; color: var(--muted); line-height: 1.65; }
+
+  /* FOOTER */
+  footer {
+    background: var(--surface); border-top: 1px solid var(--border);
+    padding: 3rem 5%; text-align: center;
+  }
+  .footer-logo { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.3rem; margin-bottom: 0.5rem; }
+  .footer-logo span { color: var(--accent); }
+  .footer-sub { color: var(--muted); font-size: 0.85rem; margin-bottom: 1.5rem; }
+  .footer-links { display: flex; gap: 1.5rem; justify-content: center; flex-wrap: wrap; margin-bottom: 2rem; }
+  .footer-links a { color: var(--muted); text-decoration: none; font-size: 0.85rem; transition: color 0.2s; }
+  .footer-links a:hover { color: var(--accent); }
+  .footer-copy { font-size: 0.78rem; color: rgba(136,136,170,0.5); }
+
+  @media(max-width:768px) {
+    .hero-visual { display: none; }
+    .nav-links { display: none; }
+    .hero-stats { gap: 1.5rem; flex-wrap: wrap; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="logo">CA<span>Final</span>Pro</a>
+  <ul class="nav-links">
+    <li><a href="#subjects">Subjects</a></li>
+    <li><a href="#how">How it Works</a></li>
+    <li><a href="#features">Features</a></li>
+  </ul>
+  <div class="nav-cta">
+    <a href="login.html" class="btn-ghost">Log In</a>
+    <a href="signup.html" class="btn-primary">Get Started</a>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-grid"></div>
+  <div class="hero-content">
+    <div class="badge"><span class="dot"></span> India's #1 CA Final Learning Platform</div>
+    <h1>Crack CA Final<br>with <span class="highlight">Expert Lectures</span><br>& Study Material</h1>
+    <p class="hero-sub">Structured video lectures and PDF notes for CA Final — curated by experts, delivered at an accessible price.</p>
+    <div class="hero-actions">
+      <a href="signup.html" class="btn-primary btn-lg">Start Learning →</a>
+      <a href="#subjects" class="btn-ghost btn-lg">Browse Subjects</a>
+    </div>
+    <div class="hero-stats">
+      <div class="stat-item"><div class="stat-num">500+</div><div class="stat-label">Video Lectures</div></div>
+      <div class="stat-item"><div class="stat-num">2</div><div class="stat-label">Groups Available</div></div>
+      <div class="stat-item"><div class="stat-num">3</div><div class="stat-label">Subjects in Group 1</div></div>
+    </div>
+  </div>
+  <div class="hero-visual">
+    <div class="float-card">
+      <div class="fc-label">Now Watching</div>
+      <div class="fc-title">📊 Financial Reporting – Ind AS 116</div>
+      <div class="fc-bar"><div class="fc-bar-fill" style="width:65%"></div></div>
+      <div class="fc-chapters">Chapter 4 of 12 · 2h 14m remaining</div>
+    </div>
+    <div class="float-card">
+      <div class="fc-label">Quick Access</div>
+      <div class="fc-title">📄 FR Summary Notes – PDF</div>
+      <div class="fc-chapters">Updated Nov 2024 · 124 pages</div>
+    </div>
+    <div class="float-card" style="border-color: rgba(249,115,22,0.3)">
+      <div class="fc-label">Your Progress</div>
+      <div class="fc-title">FR – Financial Reporting</div>
+      <div class="fc-bar"><div class="fc-bar-fill" style="width:32%"></div></div>
+      <div class="fc-chapters">32% complete · Keep going! 🔥</div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="subjects">
+  <div class="section-label">Our Courses</div>
+  <div class="section-title">Choose Your Group</div>
+  <p class="section-sub">Select the group you're preparing for. Each group includes curated lectures and PDF notes for every subject.</p>
+
+  <!-- GROUP 1 -->
+  <div style="margin-bottom:0.75rem;">
+    <div style="display:inline-flex;align-items:center;gap:0.6rem;background:rgba(249,115,22,0.1);border:1px solid rgba(249,115,22,0.3);color:var(--accent2);padding:0.3rem 0.9rem;border-radius:6px;font-size:0.8rem;font-weight:600;margin-bottom:1rem;">
+      📦 Group 1 — Now Available
+    </div>
+  </div>
+  <div class="subjects-grid" style="margin-bottom:3rem;">
+    <a href="dashboard.html" class="subject-card">
+      <div class="sc-icon">📊</div>
+      <div class="sc-name">Financial Reporting (FR)</div>
+      <div class="sc-meta">Lectures + PDF Notes</div>
+      <div class="sc-tag">Group 1</div>
+    </a>
+    <a href="dashboard.html" class="subject-card">
+      <div class="sc-icon">📈</div>
+      <div class="sc-name">Advanced Financial Management (AFM)</div>
+      <div class="sc-meta">Lectures + PDF Notes</div>
+      <div class="sc-tag">Group 1</div>
+    </a>
+    <a href="dashboard.html" class="subject-card">
+      <div class="sc-icon">🔍</div>
+      <div class="sc-name">Advanced Auditing, Assurance & Professional Ethics</div>
+      <div class="sc-meta">Lectures + PDF Notes</div>
+      <div class="sc-tag">Group 1</div>
+    </a>
+  </div>
+
+  <!-- GROUP 2 -->
+  <div style="margin-bottom:0.75rem;">
+    <div style="display:inline-flex;align-items:center;gap:0.6rem;background:rgba(136,136,170,0.08);border:1px solid var(--border);color:var(--muted);padding:0.3rem 0.9rem;border-radius:6px;font-size:0.8rem;font-weight:600;margin-bottom:1rem;">
+      🔒 Group 2 — Coming Soon
+    </div>
+  </div>
+  <div class="subjects-grid">
+    <div class="subject-card" style="opacity:0.45;pointer-events:none;">
+      <div class="sc-icon">⚖️</div>
+      <div class="sc-name">Corporate & Economic Laws</div>
+      <div class="sc-meta">Lectures + PDF Notes</div>
+      <div class="sc-tag" style="background:rgba(136,136,170,0.1);color:var(--muted);">Coming Soon</div>
+    </div>
+    <div class="subject-card" style="opacity:0.45;pointer-events:none;">
+      <div class="sc-icon">🏛️</div>
+      <div class="sc-name">Strategic Cost & Performance Mgmt</div>
+      <div class="sc-meta">Lectures + PDF Notes</div>
+      <div class="sc-tag" style="background:rgba(136,136,170,0.1);color:var(--muted);">Coming Soon</div>
+    </div>
+    <div class="subject-card" style="opacity:0.45;pointer-events:none;">
+      <div class="sc-icon">🧾</div>
+      <div class="sc-name">Direct & Indirect Tax Laws</div>
+      <div class="sc-meta">Lectures + PDF Notes</div>
+      <div class="sc-tag" style="background:rgba(136,136,170,0.1);color:var(--muted);">Coming Soon</div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="how" style="background: var(--surface);">
+  <div class="section-label">How It Works</div>
+  <div class="section-title">Simple as 1-2-3</div>
+  <p class="section-sub">Get access in minutes and start studying right away.</p>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">01</div>
+      <div class="step-title">Create Your Account</div>
+      <div class="step-desc">Sign up with your email or Google account in under 60 seconds.</div>
+    </div>
+    <div class="step">
+      <div class="step-num">02</div>
+      <div class="step-title">Purchase a Group</div>
+      <div class="step-desc">Select Group 1, Group 2, or both — and get instant access to all lectures and PDFs.</div>
+    </div>
+    <div class="step">
+      <div class="step-num">03</div>
+      <div class="step-title">Watch Lectures</div>
+      <div class="step-desc">Stream expert HD lectures anytime, on any device — at your own pace.</div>
+    </div>
+    <div class="step">
+      <div class="step-num">04</div>
+      <div class="step-title">Download PDF Notes</div>
+      <div class="step-desc">Download chapter-wise PDF notes and revision material to study offline.</div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="features">
+  <div class="section-label">Features</div>
+  <div class="section-title">Everything You Need<br>to Clear CA Final</div>
+  <p class="section-sub">Built specifically for serious CA Final aspirants.</p>
+  <div class="features-grid">
+    <div class="feature-card"><div class="fi">🎬</div><div class="ft">HD Video Lectures</div><div class="fd">Crisp, high-quality lectures with no buffering and no distractions.</div></div>
+    <div class="feature-card"><div class="fi">📄</div><div class="ft">PDF Notes & Summaries</div><div class="fd">Downloadable chapter-wise PDFs including ICAI amendment notes.</div></div>
+    <div class="feature-card"><div class="fi">📱</div><div class="ft">Any Device, Anywhere</div><div class="fd">Access lectures and notes on your phone, tablet, or computer.</div></div>
+    <div class="feature-card"><div class="fi">📊</div><div class="ft">Progress Tracking</div><div class="fd">Visual progress bars so you always know exactly where you stand.</div></div>
+    <div class="feature-card"><div class="fi">🎯</div><div class="ft">Group-wise Access</div><div class="fd">Buy Group 1, Group 2, or both — access only what you need.</div></div>
+    <div class="feature-card"><div class="fi">🔒</div><div class="ft">Secure & Private</div><div class="fd">Your account and study data are safe with secure login and authentication.</div></div>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-logo">CA<span>Final</span>Pro</div>
+  <div class="footer-sub">India's CA Final learning platform for serious aspirants</div>
+  <div class="footer-links">
+    <a href="#subjects">Subjects</a>
+    <a href="#how">How it Works</a>
+    <a href="login.html">Login</a>
+    <a href="signup.html">Sign Up</a>
+  </div>
+  <div class="footer-copy">© 2024 CAFinalPro. Made with ❤️ for CA Students.</div>
+</footer>
+
+</body>
+</html>
