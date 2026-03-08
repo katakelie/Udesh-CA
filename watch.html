@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Watch – CAFinalPro</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#0a0a0f;--surface:#12121a;--card:#1a1a26;--border:#2a2a3d;--accent:#f97316;--accent2:#fb923c;--text:#f1f1f8;--muted:#8888aa;--gradient:linear-gradient(135deg,#f97316,#ef4444);}
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;}
+
+  /* NAV */
+  nav{background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 2rem;height:60px;position:sticky;top:0;z-index:100;}
+  .nav-logo{font-family:'Syne',sans-serif;font-weight:800;font-size:1.15rem;text-decoration:none;color:var(--text);}
+  .nav-logo span{color:var(--accent);}
+  .nav-center{font-size:0.82rem;color:var(--muted);max-width:400px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .nav-back{display:flex;align-items:center;gap:0.4rem;color:var(--muted);text-decoration:none;font-size:0.85rem;transition:color 0.2s;}
+  .nav-back:hover{color:var(--text);}
+
+  /* LAYOUT */
+  .layout{display:grid;grid-template-columns:1fr 360px;min-height:calc(100vh - 60px);}
+
+  /* PLAYER */
+  .player-col{padding:1.5rem 2rem;overflow-y:auto;}
+  .video-wrap{background:#000;border-radius:14px;overflow:hidden;aspect-ratio:16/9;margin-bottom:1.25rem;position:relative;}
+  .video-wrap iframe{width:100%;height:100%;border:none;display:block;}
+  .placeholder{width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0.75rem;background:var(--card);color:var(--muted);}
+  .placeholder-icon{font-size:3rem;}
+  .placeholder-text{font-size:0.9rem;font-weight:500;}
+  .placeholder-sub{font-size:0.75rem;color:rgba(136,136,170,0.6);}
+
+  .lec-title{font-family:'Syne',sans-serif;font-size:1.25rem;font-weight:800;margin-bottom:0.5rem;line-height:1.3;}
+  .lec-meta{display:flex;gap:1.25rem;flex-wrap:wrap;color:var(--muted);font-size:0.8rem;margin-bottom:1rem;}
+  .lec-desc{font-size:0.87rem;color:var(--muted);line-height:1.7;margin-bottom:1.25rem;padding:1rem;background:var(--card);border-radius:10px;border:1px solid var(--border);}
+
+  .action-row{display:flex;gap:0.65rem;flex-wrap:wrap;}
+  .btn{padding:0.55rem 1.1rem;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:0.82rem;font-weight:500;cursor:pointer;transition:all 0.2s;border:none;}
+  .btn-done{background:rgba(34,197,94,0.12);border:1px solid rgba(34,197,94,0.3);color:#86efac;}
+  .btn-done:hover{background:rgba(34,197,94,0.2);}
+  .btn-done.marked{background:rgba(34,197,94,0.25);border-color:rgba(34,197,94,0.6);}
+  .btn-nav{background:transparent;border:1px solid var(--border);color:var(--text);}
+  .btn-nav:hover{border-color:var(--accent);color:var(--accent);}
+  .btn-nav:disabled{opacity:0.35;cursor:not-allowed;}
+  .btn-back{background:var(--gradient);color:white;}
+  .btn-back:hover{opacity:0.88;}
+
+  /* PLAYLIST */
+  .playlist-col{border-left:1px solid var(--border);display:flex;flex-direction:column;height:calc(100vh - 60px);position:sticky;top:60px;}
+  .pl-header{padding:1rem 1.25rem;border-bottom:1px solid var(--border);flex-shrink:0;}
+  .pl-subject{font-size:0.7rem;color:var(--accent2);font-weight:600;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.3rem;}
+  .pl-title{font-family:'Syne',sans-serif;font-size:0.92rem;font-weight:700;margin-bottom:0.4rem;}
+  .pl-meta{font-size:0.72rem;color:var(--muted);}
+  .pl-progress{height:3px;background:var(--border);border-radius:2px;margin-top:0.75rem;}
+  .pl-bar{height:100%;background:var(--gradient);border-radius:2px;transition:width 0.4s;}
+
+  .pl-search{padding:0.75rem 1.25rem;border-bottom:1px solid var(--border);flex-shrink:0;}
+  .pl-search input{width:100%;background:var(--card);border:1px solid var(--border);color:var(--text);padding:0.5rem 0.75rem;border-radius:8px;font-size:0.8rem;font-family:'DM Sans',sans-serif;outline:none;}
+  .pl-search input:focus{border-color:var(--accent);}
+  .pl-search input::placeholder{color:rgba(136,136,170,0.4);}
+
+  .pl-body{flex:1;overflow-y:auto;}
+
+  .ch-label{font-size:0.67rem;text-transform:uppercase;letter-spacing:0.1em;color:rgba(136,136,170,0.45);padding:0.85rem 1.25rem 0.35rem;font-weight:600;position:sticky;top:0;background:var(--bg);z-index:1;}
+
+  .pl-item{display:flex;align-items:flex-start;gap:0.65rem;padding:0.7rem 1.25rem;cursor:pointer;transition:background 0.15s;border-left:2px solid transparent;}
+  .pl-item:hover{background:rgba(255,255,255,0.03);}
+  .pl-item.active{background:rgba(249,115,22,0.07);border-left-color:var(--accent);}
+  .pl-item.watched .pi-num{color:#22c55e;}
+  .pi-num{width:22px;font-size:0.72rem;color:var(--muted);text-align:center;flex-shrink:0;padding-top:0.15rem;}
+  .pi-info{flex:1;min-width:0;}
+  .pi-title{font-size:0.82rem;font-weight:500;line-height:1.35;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;}
+  .pi-dur{font-size:0.7rem;color:var(--muted);margin-top:0.2rem;}
+  .pi-status{flex-shrink:0;font-size:0.75rem;padding-top:0.1rem;}
+
+  /* LOADING */
+  .loading{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:3rem;color:var(--muted);gap:0.75rem;}
+  .spin{width:24px;height:24px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin 0.7s linear infinite;}
+  @keyframes spin{to{transform:rotate(360deg)}}
+
+  .empty{text-align:center;padding:2.5rem 1rem;color:var(--muted);}
+  .empty-icon{font-size:2.5rem;margin-bottom:0.75rem;}
+
+  @media(max-width:900px){
+    .layout{grid-template-columns:1fr;}
+    .player-col{padding:1rem;}
+    .playlist-col{height:auto;position:static;border-left:none;border-top:1px solid var(--border);}
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-logo">CA<span>Final</span>Pro</a>
+  <div class="nav-center" id="navTitle">Loading lecture...</div>
+  <a id="navBack" href="dashboard.html" class="nav-back">← Back</a>
+</nav>
+
+<div class="layout">
+  <!-- PLAYER COLUMN -->
+  <div class="player-col">
+    <div class="video-wrap" id="videoWrap">
+      <div class="placeholder">
+        <div class="placeholder-icon">▶️</div>
+        <div class="placeholder-text">Select a lecture from the playlist</div>
+        <div class="placeholder-sub">Loading content...</div>
+      </div>
+    </div>
+
+    <div class="lec-title" id="lecTitle">Loading...</div>
+    <div class="lec-meta" id="lecMeta"></div>
+    <div class="lec-desc" id="lecDesc" style="display:none;"></div>
+
+    <div class="action-row">
+      <button class="btn btn-done" id="btnDone" onclick="toggleDone()">✅ Mark as Done</button>
+      <button class="btn btn-nav" id="btnPrev" onclick="navigateLec(-1)" disabled>⬅ Previous</button>
+      <button class="btn btn-nav" id="btnNext" onclick="navigateLec(1)" disabled>Next →</button>
+      <a id="btnBackSubject" href="dashboard.html" class="btn btn-back" style="text-decoration:none;">📚 Back to Subject</a>
+    </div>
+  </div>
+
+  <!-- PLAYLIST COLUMN -->
+  <div class="playlist-col">
+    <div class="pl-header">
+      <div class="pl-subject" id="plSubject">Loading...</div>
+      <div class="pl-title" id="plTitle">Loading lectures...</div>
+      <div class="pl-meta" id="plMeta"></div>
+      <div class="pl-progress"><div class="pl-bar" id="plBar" style="width:0%"></div></div>
+    </div>
+    <div class="pl-search">
+      <input type="text" placeholder="🔍 Search lectures..." oninput="searchPlaylist(this.value)">
+    </div>
+    <div class="pl-body" id="playlistBody">
+      <div class="loading"><div class="spin"></div><span>Loading playlist...</span></div>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
+import { getFirestore, collection, query, where, orderBy, getDocs } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+
+// ⚠️ REPLACE WITH YOUR FIREBASE CONFIG
+const firebaseConfig = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_PROJECT.firebaseapp.com",
+  projectId: "YOUR_PROJECT_ID",
+  storageBucket: "YOUR_PROJECT.appspot.com",
+  messagingSenderId: "YOUR_SENDER_ID",
+  appId: "YOUR_APP_ID"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+// Parse URL params
+const params = new URLSearchParams(window.location.search);
+const startVideoId = params.get('v');
+const startTitle   = params.get('t');
+const subject      = params.get('s') || 'FR';
+const startDesc    = params.get('d') || '';
+
+// Subject display names
+const SUBJECT_NAMES = {
+  FR: 'Financial Reporting (FR)',
+  AFM: 'Advanced Financial Management (AFM)',
+  AUDIT: 'Advanced Auditing & Ethics'
+};
+const SUBJECT_PAGES = {
+  FR: 'subject-fr.html',
+  AFM: 'subject-afm.html',
+  AUDIT: 'subject-audit.html'
+};
+
+// Update back link
+document.getElementById('navBack').href = SUBJECT_PAGES[subject] || 'dashboard.html';
+document.getElementById('btnBackSubject').href = SUBJECT_PAGES[subject] || 'dashboard.html';
+document.getElementById('plSubject').textContent = '📦 Group 1 · ' + (SUBJECT_NAMES[subject] || subject);
+
+// Auth check
+onAuthStateChanged(auth, user => {
+  if (!user) { window.location.href = 'login.html'; return; }
+  loadPlaylist();
+});
+
+// State
+let allLectures = [];
+let currentIndex = -1;
+const watchedSet = new Set(JSON.parse(localStorage.getItem('watched_' + subject) || '[]'));
+
+async function loadPlaylist() {
+  try {
+    const q = query(
+      collection(db, 'lectures'),
+      where('subject', '==', subject),
+      orderBy('order', 'asc')
+    );
+    const snap = await getDocs(q);
+    allLectures = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+    if (!allLectures.length) {
+      document.getElementById('playlistBody').innerHTML = `<div class="empty"><div class="empty-icon">🎬</div>No lectures uploaded yet for this subject.</div>`;
+      document.getElementById('plTitle').textContent = 'No lectures yet';
+      return;
+    }
+
+    document.getElementById('plTitle').textContent = SUBJECT_NAMES[subject] || subject;
+    renderPlaylist(allLectures);
+    updateProgress();
+
+    // Auto-play if video ID passed in URL
+    if (startVideoId) {
+      const idx = allLectures.findIndex(l => l.videoId === startVideoId);
+      if (idx !== -1) playLecture(idx);
+      else playLecture(0); // fallback to first
+    } else {
+      playLecture(0); // auto-play first lecture
+    }
+  } catch(e) {
+    document.getElementById('playlistBody').innerHTML = `<div class="empty">⚠️ Error loading lectures. Please refresh.</div>`;
+    console.error('Playlist load error:', e);
+  }
+}
+
+function renderPlaylist(lectures) {
+  // Group by chapter
+  const chapters = {};
+  lectures.forEach((l, idx) => {
+    const ch = l.chapter || 'General';
+    if (!chapters[ch]) chapters[ch] = [];
+    chapters[ch].push({ ...l, _globalIdx: allLectures.indexOf(l) });
+  });
+
+  let html = '';
+  let num = 1;
+  for (const [ch, items] of Object.entries(chapters)) {
+    html += `<div class="ch-label">${ch}</div>`;
+    items.forEach(l => {
+      const isWatched = watchedSet.has(l.videoId);
+      const isActive = l._globalIdx === currentIndex;
+      html += `
+        <div class="pl-item ${isActive ? 'active' : ''} ${isWatched ? 'watched' : ''}"
+             id="plitem-${l._globalIdx}"
+             onclick="playLecture(${l._globalIdx})">
+          <div class="pi-num">${isWatched ? '✓' : num}</div>
+          <div class="pi-info">
+            <div class="pi-title">${l.title}</div>
+            <div class="pi-dur">⏱ ${l.duration || ''}</div>
+          </div>
+          <div class="pi-status">${isActive ? '▶' : isWatched ? '✅' : ''}</div>
+        </div>`;
+      num++;
+    });
+  }
+  document.getElementById('playlistBody').innerHTML = html;
+  updateProgress();
+}
+
+window.playLecture = function(idx) {
+  if (idx < 0 || idx >= allLectures.length) return;
+  currentIndex = idx;
+  const l = allLectures[idx];
+
+  // Update video player
+  const wrap = document.getElementById('videoWrap');
+  if (l.videoId && !l.videoId.startsWith('YOUTUBE_VIDEO_ID')) {
+    wrap.innerHTML = `<iframe
+      src="https://www.youtube.com/embed/${l.videoId}?autoplay=1&rel=0&modestbranding=1"
+      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+      allowfullscreen></iframe>`;
+  } else {
+    wrap.innerHTML = `<div class="placeholder">
+      <div class="placeholder-icon">⚠️</div>
+      <div class="placeholder-text">Video not available</div>
+      <div class="placeholder-sub">The video ID for this lecture is not set yet.</div>
+    </div>`;
+  }
+
+  // Update info
+  document.getElementById('lecTitle').textContent = l.title;
+  document.getElementById('navTitle').textContent = l.title;
+  document.title = l.title + ' – CAFinalPro';
+
+  const meta = document.getElementById('lecMeta');
+  meta.innerHTML = `
+    <span>📦 ${SUBJECT_NAMES[subject] || subject}</span>
+    ${l.duration ? `<span>⏱ ${l.duration}</span>` : ''}
+    ${l.chapter ? `<span>📖 ${l.chapter}</span>` : ''}`;
+
+  const descEl = document.getElementById('lecDesc');
+  if (l.description) {
+    descEl.textContent = l.description;
+    descEl.style.display = 'block';
+  } else {
+    descEl.style.display = 'none';
+  }
+
+  // Update done button
+  const btnDone = document.getElementById('btnDone');
+  if (watchedSet.has(l.videoId)) {
+    btnDone.textContent = '✅ Watched';
+    btnDone.classList.add('marked');
+  } else {
+    btnDone.textContent = '✅ Mark as Done';
+    btnDone.classList.remove('marked');
+  }
+
+  // Prev/Next buttons
+  document.getElementById('btnPrev').disabled = idx === 0;
+  document.getElementById('btnNext').disabled = idx === allLectures.length - 1;
+
+  // Re-render playlist to update active state
+  renderPlaylist(allLectures);
+
+  // Scroll active item into view
+  setTimeout(() => {
+    const el = document.getElementById('plitem-' + idx);
+    if (el) el.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+  }, 100);
+};
+
+window.navigateLec = function(dir) {
+  playLecture(currentIndex + dir);
+};
+
+window.toggleDone = function() {
+  if (currentIndex < 0) return;
+  const l = allLectures[currentIndex];
+  const btn = document.getElementById('btnDone');
+  if (watchedSet.has(l.videoId)) {
+    watchedSet.delete(l.videoId);
+    btn.textContent = '✅ Mark as Done';
+    btn.classList.remove('marked');
+  } else {
+    watchedSet.add(l.videoId);
+    btn.textContent = '✅ Watched';
+    btn.classList.add('marked');
+    // Auto-advance to next lecture after marking done
+    setTimeout(() => {
+      if (currentIndex < allLectures.length - 1) navigateLec(1);
+    }, 800);
+  }
+  localStorage.setItem('watched_' + subject, JSON.stringify([...watchedSet]));
+  updateProgress();
+  renderPlaylist(allLectures);
+};
+
+function updateProgress() {
+  const total = allLectures.length;
+  const done = allLectures.filter(l => watchedSet.has(l.videoId)).length;
+  const pct = total ? Math.round((done / total) * 100) : 0;
+  document.getElementById('plMeta').textContent = `${total} lectures · ${done} watched · ${pct}% complete`;
+  document.getElementById('plBar').style.width = pct + '%';
+}
+
+window.searchPlaylist = function(val) {
+  val = val.toLowerCase();
+  const filtered = val ? allLectures.filter(l =>
+    l.title?.toLowerCase().includes(val) ||
+    l.chapter?.toLowerCase().includes(val)
+  ) : allLectures;
+  renderPlaylist(filtered);
+};
+</script>
+
+</body>
+</html>

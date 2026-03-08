@@ -1,0 +1,942 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Panel – CAFinalPro</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0a0f;--surface:#12121a;--card:#1a1a26;--border:#2a2a3d;--accent:#f97316;--accent2:#fb923c;--text:#f1f1f8;--muted:#8888aa;--gradient:linear-gradient(135deg,#f97316,#ef4444);--red:#ef4444;--green:#22c55e;--blue:#3b82f6;--purple:#a855f7;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;display:flex;min-height:100vh;}
+
+/* SIDEBAR */
+.sidebar{width:240px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:0;position:fixed;top:0;left:0;height:100vh;z-index:50;overflow-y:auto;}
+.sb-top{padding:1.25rem 1.25rem 0.5rem;}
+.sb-logo{font-family:'Syne',sans-serif;font-weight:800;font-size:1.15rem;color:var(--text);display:block;text-decoration:none;margin-bottom:0.3rem;}
+.sb-logo span{color:var(--accent);}
+.sb-badge{font-size:0.65rem;color:var(--accent2);background:rgba(249,115,22,0.1);border:1px solid rgba(249,115,22,0.25);padding:0.15rem 0.55rem;border-radius:4px;font-weight:700;display:inline-block;margin-bottom:1rem;}
+.sb-section{font-size:0.62rem;text-transform:uppercase;letter-spacing:0.1em;color:rgba(136,136,170,0.4);padding:0.75rem 1.25rem 0.3rem;display:block;font-weight:700;}
+.sb-btn{display:flex;align-items:center;gap:0.6rem;padding:0.55rem 1.25rem;color:var(--muted);font-size:0.83rem;font-weight:500;transition:all 0.18s;border-left:2px solid transparent;cursor:pointer;background:none;border-top:none;border-right:none;border-bottom:none;width:100%;font-family:'DM Sans',sans-serif;text-align:left;}
+.sb-btn:hover{color:var(--text);background:rgba(255,255,255,0.03);}
+.sb-btn.active{color:var(--accent);background:rgba(249,115,22,0.07);border-left-color:var(--accent);}
+.sb-icon{font-size:0.9rem;width:18px;text-align:center;flex-shrink:0;}
+.sb-count{margin-left:auto;background:rgba(249,115,22,0.15);color:var(--accent2);font-size:0.65rem;padding:0.1rem 0.45rem;border-radius:10px;font-weight:700;}
+.sb-divider{height:1px;background:var(--border);margin:0.5rem 1.25rem;}
+.sb-bottom{padding:1rem 1.25rem;border-top:1px solid var(--border);margin-top:auto;}
+.sb-user-row{display:flex;align-items:center;gap:0.65rem;margin-bottom:0.65rem;}
+.sb-avatar{width:32px;height:32px;border-radius:50%;background:var(--gradient);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.8rem;flex-shrink:0;}
+.sb-name{font-size:0.82rem;font-weight:600;}
+.sb-email{font-size:0.68rem;color:var(--muted);}
+.btn-logout{width:100%;background:transparent;border:1px solid var(--border);color:var(--muted);padding:0.45rem;border-radius:7px;cursor:pointer;font-size:0.77rem;font-family:'DM Sans',sans-serif;transition:all 0.2s;}
+.btn-logout:hover{border-color:rgba(239,68,68,0.5);color:#fca5a5;}
+
+/* MAIN */
+.main{margin-left:240px;flex:1;padding:2rem 2.5rem;min-height:100vh;}
+.page-hdr{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:2rem;gap:1rem;flex-wrap:wrap;}
+.page-title{font-family:'Syne',sans-serif;font-size:1.4rem;font-weight:800;}
+.page-sub{font-size:0.8rem;color:var(--muted);margin-top:0.2rem;}
+
+/* PANELS */
+.panel{display:none;}
+.panel.active{display:block;}
+
+/* STATS GRID */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:2rem;}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1.1rem 1.25rem;position:relative;overflow:hidden;}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--gradient);}
+.stat-val{font-family:'Syne',sans-serif;font-size:2rem;font-weight:800;margin-bottom:0.2rem;}
+.stat-lbl{font-size:0.75rem;color:var(--muted);}
+
+/* FILTER BAR */
+.filter-bar{display:flex;gap:0.65rem;margin-bottom:1.25rem;flex-wrap:wrap;align-items:center;}
+.filter-bar input, .filter-bar select{background:var(--card);border:1px solid var(--border);color:var(--text);padding:0.5rem 0.85rem;border-radius:9px;font-size:0.82rem;font-family:'DM Sans',sans-serif;outline:none;transition:border-color 0.2s;}
+.filter-bar input:focus,.filter-bar select:focus{border-color:var(--accent);}
+.filter-bar input::placeholder{color:rgba(136,136,170,0.4);}
+.search-inp{flex:1;min-width:180px;}
+
+/* TABLE */
+.tbl-wrap{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;}
+table{width:100%;border-collapse:collapse;}
+thead tr{background:var(--surface);}
+th{padding:0.7rem 1rem;font-size:0.68rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);font-weight:700;text-align:left;border-bottom:1px solid var(--border);}
+td{padding:0.8rem 1rem;font-size:0.83rem;border-bottom:1px solid rgba(42,42,61,0.5);vertical-align:middle;}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:rgba(255,255,255,0.015);}
+.td-main{font-weight:500;}
+.td-sub{font-size:0.7rem;color:var(--muted);margin-top:0.12rem;}
+code{background:var(--surface);padding:0.15rem 0.45rem;border-radius:5px;font-size:0.72rem;color:var(--accent2);max-width:140px;display:inline-block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;vertical-align:middle;}
+
+/* BADGES */
+.badge{display:inline-block;font-size:0.67rem;font-weight:700;padding:0.18rem 0.55rem;border-radius:5px;}
+.badge-fr{background:rgba(59,130,246,0.12);color:#93c5fd;}
+.badge-afm{background:rgba(168,85,247,0.12);color:#c4b5fd;}
+.badge-audit{background:rgba(34,197,94,0.12);color:#86efac;}
+.badge-video{background:rgba(249,115,22,0.12);color:#fdba74;}
+.badge-pdf{background:rgba(251,191,36,0.12);color:#fde68a;}
+.badge-on{background:rgba(34,197,94,0.12);color:#86efac;}
+.badge-off{background:rgba(136,136,170,0.1);color:var(--muted);}
+
+/* ACTION BUTTONS */
+.act-btns{display:flex;gap:0.35rem;flex-wrap:nowrap;}
+.btn-ic{width:30px;height:30px;border-radius:7px;border:1px solid var(--border);background:transparent;cursor:pointer;font-size:0.78rem;display:inline-flex;align-items:center;justify-content:center;transition:all 0.18s;flex-shrink:0;}
+.btn-ic:hover{border-color:var(--accent);background:rgba(249,115,22,0.08);}
+.btn-ic.del:hover{border-color:var(--red);background:rgba(239,68,68,0.08);}
+.btn-ic.preview:hover{border-color:var(--blue);background:rgba(59,130,246,0.08);}
+.btn-ic.toggle:hover{border-color:var(--green);background:rgba(34,197,94,0.08);}
+
+/* ADD BUTTON */
+.btn-add{background:var(--gradient);color:white;border:none;padding:0.55rem 1.1rem;border-radius:9px;font-size:0.82rem;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;transition:opacity 0.2s;display:inline-flex;align-items:center;gap:0.5rem;}
+.btn-add:hover{opacity:0.88;}
+.btn-secondary{background:transparent;border:1px solid var(--border);color:var(--text);padding:0.5rem 1rem;border-radius:9px;font-size:0.82rem;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all 0.2s;}
+.btn-secondary:hover{border-color:var(--accent);color:var(--accent);}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:200;display:flex;align-items:center;justify-content:center;padding:1rem;opacity:0;pointer-events:none;transition:opacity 0.2s;}
+.modal-overlay.open{opacity:1;pointer-events:all;}
+.modal{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:2rem;width:100%;max-width:540px;position:relative;transform:translateY(16px);transition:transform 0.2s;max-height:90vh;overflow-y:auto;}
+.modal-overlay.open .modal{transform:translateY(0);}
+.modal-hdr{margin-bottom:1.5rem;}
+.modal-title{font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:800;margin-bottom:0.2rem;}
+.modal-sub{font-size:0.78rem;color:var(--muted);}
+.modal-close{position:absolute;top:1.25rem;right:1.25rem;background:var(--border);border:none;color:var(--muted);width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;transition:all 0.2s;}
+.modal-close:hover{background:rgba(239,68,68,0.2);color:#fca5a5;}
+
+/* FORM */
+.fg{margin-bottom:0.9rem;}
+.fg label{display:block;font-size:0.75rem;font-weight:700;color:var(--muted);margin-bottom:0.35rem;text-transform:uppercase;letter-spacing:0.05em;}
+.fg input,.fg select,.fg textarea{width:100%;background:var(--surface);border:1px solid var(--border);color:var(--text);padding:0.65rem 0.9rem;border-radius:10px;font-size:0.87rem;font-family:'DM Sans',sans-serif;outline:none;transition:border-color 0.2s,box-shadow 0.2s;}
+.fg input:focus,.fg select:focus,.fg textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(249,115,22,0.1);}
+.fg input::placeholder,.fg textarea::placeholder{color:rgba(136,136,170,0.35);}
+.fg textarea{resize:vertical;min-height:75px;}
+.fg .hint{font-size:0.7rem;color:var(--muted);margin-top:0.3rem;}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:0.9rem;}
+.btn-submit{width:100%;background:var(--gradient);color:white;border:none;padding:0.78rem;border-radius:10px;font-size:0.92rem;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;transition:opacity 0.2s;margin-top:0.5rem;}
+.btn-submit:hover{opacity:0.88;}
+.btn-submit:disabled{opacity:0.45;cursor:not-allowed;}
+
+/* CONFIRM */
+.confirm-modal{max-width:380px;text-align:center;}
+.confirm-icon{font-size:2.5rem;margin-bottom:0.75rem;}
+.confirm-msg{color:var(--muted);font-size:0.87rem;margin-bottom:1.5rem;line-height:1.6;}
+.confirm-btns{display:flex;gap:0.65rem;justify-content:center;}
+.btn-cancel{background:transparent;border:1px solid var(--border);color:var(--text);padding:0.6rem 1.4rem;border-radius:9px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:0.83rem;transition:all 0.2s;}
+.btn-delete-confirm{background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.4);color:#fca5a5;padding:0.6rem 1.4rem;border-radius:9px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:0.83rem;font-weight:600;transition:all 0.2s;}
+.btn-delete-confirm:hover{background:rgba(239,68,68,0.25);}
+
+/* TOGGLE SWITCH */
+.toggle-row{display:flex;align-items:center;justify-content:space-between;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:0.75rem 1rem;margin-bottom:0.75rem;}
+.toggle-label{font-size:0.85rem;font-weight:500;}
+.toggle-sub{font-size:0.72rem;color:var(--muted);margin-top:0.1rem;}
+.switch{position:relative;display:inline-block;width:44px;height:24px;flex-shrink:0;}
+.switch input{opacity:0;width:0;height:0;}
+.slider{position:absolute;cursor:pointer;inset:0;background:var(--border);border-radius:24px;transition:0.3s;}
+.slider:before{position:absolute;content:"";height:18px;width:18px;left:3px;bottom:3px;background:white;border-radius:50%;transition:0.3s;}
+input:checked+.slider{background:var(--accent);}
+input:checked+.slider:before{transform:translateX(20px);}
+
+/* QUICK CARDS */
+.quick-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:2rem;}
+.quick-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1.4rem;cursor:pointer;transition:all 0.22s;}
+.quick-card:hover{border-color:var(--accent);transform:translateY(-3px);}
+.qc-icon{font-size:1.8rem;margin-bottom:0.75rem;}
+.qc-title{font-family:'Syne',sans-serif;font-weight:700;font-size:0.9rem;margin-bottom:0.3rem;}
+.qc-sub{font-size:0.77rem;color:var(--muted);}
+
+/* SECTION HEADER */
+.sec-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:0.5rem;}
+.sec-title{font-family:'Syne',sans-serif;font-weight:700;font-size:0.95rem;}
+
+/* ANNOUNCEMENTS */
+.ann-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.1rem 1.25rem;margin-bottom:0.65rem;display:flex;align-items:flex-start;gap:1rem;}
+.ann-icon{font-size:1.3rem;flex-shrink:0;padding-top:0.1rem;}
+.ann-title{font-size:0.88rem;font-weight:600;margin-bottom:0.25rem;}
+.ann-body{font-size:0.8rem;color:var(--muted);line-height:1.5;}
+.ann-actions{margin-left:auto;display:flex;gap:0.35rem;flex-shrink:0;}
+
+/* SUBJECT SETTINGS */
+.subj-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1.25rem;margin-bottom:1rem;}
+.subj-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;}
+.subj-name{font-family:'Syne',sans-serif;font-weight:700;font-size:0.95rem;display:flex;align-items:center;gap:0.5rem;}
+.subj-desc-edit{width:100%;background:var(--surface);border:1px solid var(--border);color:var(--text);padding:0.6rem 0.85rem;border-radius:9px;font-size:0.83rem;font-family:'DM Sans',sans-serif;outline:none;resize:vertical;min-height:60px;margin-bottom:0.75rem;}
+.btn-save-sm{background:var(--gradient);color:white;border:none;padding:0.4rem 0.9rem;border-radius:7px;font-size:0.78rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;}
+
+/* TOAST */
+.toast{position:fixed;bottom:2rem;right:2rem;z-index:500;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:0.8rem 1.2rem;font-size:0.83rem;font-weight:500;display:flex;align-items:center;gap:0.55rem;box-shadow:0 8px 32px rgba(0,0,0,0.5);transform:translateY(80px);opacity:0;transition:all 0.3s;max-width:320px;}
+.toast.show{transform:translateY(0);opacity:1;}
+.toast.success{border-color:rgba(34,197,94,0.4);}
+.toast.error{border-color:rgba(239,68,68,0.4);}
+
+/* SPINNER */
+.spin{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,0.3);border-top-color:white;border-radius:50%;animation:spin 0.7s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* LOGIN */
+#loginScreen{position:fixed;inset:0;background:var(--bg);z-index:1000;display:flex;align-items:center;justify-content:center;}
+.login-box{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:2.5rem;width:100%;max-width:380px;}
+.login-logo{font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem;margin-bottom:0.25rem;}
+.login-logo span{color:var(--accent);}
+
+/* EMPTY */
+.empty-tbl{text-align:center;padding:2.5rem 1rem;color:var(--muted);}
+.empty-tbl .ei{font-size:2.2rem;margin-bottom:0.5rem;}
+
+@media(max-width:900px){.sidebar{display:none;}.main{margin-left:0;padding:1rem;}.stats-grid{grid-template-columns:1fr 1fr;}.quick-grid{grid-template-columns:1fr 1fr;}.form-row{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="loginScreen">
+  <div class="login-box">
+    <div class="login-logo">CA<span>Final</span>Pro</div>
+    <div style="font-size:0.72rem;color:var(--accent2);margin-bottom:1.5rem;">🔐 Admin Access Only</div>
+    <div style="font-family:'Syne',sans-serif;font-size:1.15rem;font-weight:800;margin-bottom:0.25rem;">Admin Login</div>
+    <div style="font-size:0.8rem;color:var(--muted);margin-bottom:1.5rem;">Only authorised admins can access this panel.</div>
+    <div id="loginAlert" style="margin-bottom:0.75rem;"></div>
+    <div class="fg"><label>Email</label><input type="email" id="loginEmail" placeholder="admin@email.com"></div>
+    <div class="fg"><label>Password</label><input type="password" id="loginPassword" placeholder="••••••••"></div>
+    <button class="btn-submit" id="loginBtn" onclick="doLogin()">Sign In to Admin Panel</button>
+  </div>
+</div>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sb-top">
+    <a href="index.html" class="sb-logo">CA<span>Final</span>Pro</a>
+    <span class="sb-badge">⚙️ Admin Panel</span>
+  </div>
+  <span class="sb-section">Overview</span>
+  <button class="sb-btn active" onclick="nav('overview',this)"><span class="sb-icon">📊</span> Dashboard</button>
+  <span class="sb-section">Content</span>
+  <button class="sb-btn" onclick="nav('lectures',this)"><span class="sb-icon">🎬</span> Lectures <span class="sb-count" id="cnt-lec">–</span></button>
+  <button class="sb-btn" onclick="nav('pdfs',this)"><span class="sb-icon">📄</span> PDF Notes <span class="sb-count" id="cnt-pdf">–</span></button>
+  <button class="sb-btn" onclick="nav('announcements',this)"><span class="sb-icon">📢</span> Announcements</button>
+  <span class="sb-section">Settings</span>
+  <button class="sb-btn" onclick="nav('subjects',this)"><span class="sb-icon">📚</span> Subject Settings</button>
+  <button class="sb-btn" onclick="nav('site',this)"><span class="sb-icon">🌐</span> Site Settings</button>
+  <div class="sb-divider"></div>
+  <button class="sb-btn" onclick="window.open('index.html','_blank')"><span class="sb-icon">🔗</span> View Website</button>
+  <button class="sb-btn" onclick="window.open('dashboard.html','_blank')"><span class="sb-icon">👤</span> Student View</button>
+  <div class="sb-bottom">
+    <div class="sb-user-row">
+      <div class="sb-avatar" id="sbAvatar">A</div>
+      <div><div class="sb-name" id="sbName">Admin</div><div class="sb-email" id="sbEmail"></div></div>
+    </div>
+    <button class="btn-logout" onclick="doLogout()">Sign Out</button>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+
+  <!-- ══ OVERVIEW ══ -->
+  <div class="panel active" id="panel-overview">
+    <div class="page-hdr">
+      <div><div class="page-title">Dashboard</div><div class="page-sub">Welcome back! Here's an overview of your platform.</div></div>
+    </div>
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-val" id="ov-lec">–</div><div class="stat-lbl">Total Lectures</div></div>
+      <div class="stat-card"><div class="stat-val" id="ov-pdf">–</div><div class="stat-lbl">Total PDFs</div></div>
+      <div class="stat-card"><div class="stat-val">3</div><div class="stat-lbl">Subjects (Group 1)</div></div>
+      <div class="stat-card"><div class="stat-val" style="color:var(--accent2);">G2</div><div class="stat-lbl">Group 2 Coming Soon</div></div>
+    </div>
+    <div class="quick-grid">
+      <div class="quick-card" onclick="nav('lectures',null);setTimeout(()=>openModal('lecModal'),100)">
+        <div class="qc-icon">➕🎬</div><div class="qc-title">Add Lecture</div><div class="qc-sub">Upload a new video lecture link</div>
+      </div>
+      <div class="quick-card" onclick="nav('pdfs',null);setTimeout(()=>openModal('pdfModal'),100)">
+        <div class="qc-icon">➕📄</div><div class="qc-title">Add PDF Note</div><div class="qc-sub">Add a PDF study document</div>
+      </div>
+      <div class="quick-card" onclick="nav('announcements',null)">
+        <div class="qc-icon">📢</div><div class="qc-title">Announcement</div><div class="qc-sub">Post a notice for students</div>
+      </div>
+    </div>
+    <div class="sec-hdr"><div class="sec-title">Recently Added</div></div>
+    <div class="tbl-wrap"><table>
+      <thead><tr><th>Title</th><th>Type</th><th>Subject</th><th>Date</th></tr></thead>
+      <tbody id="recentTbl"><tr><td colspan="4" class="empty-tbl">Loading...</td></tr></tbody>
+    </table></div>
+  </div>
+
+  <!-- ══ LECTURES ══ -->
+  <div class="panel" id="panel-lectures">
+    <div class="page-hdr">
+      <div><div class="page-title">Lectures</div><div class="page-sub">Add, edit or delete video lectures</div></div>
+      <button class="btn-add" onclick="openModal('lecModal')">➕ Add Lecture</button>
+    </div>
+    <div class="filter-bar">
+      <input class="search-inp" type="text" placeholder="🔍 Search by title or chapter..." oninput="filterLec(this.value)">
+      <select onchange="filterLecSubj(this.value)" id="lecSubjFilter">
+        <option value="">All Subjects</option>
+        <option value="FR">Financial Reporting</option>
+        <option value="AFM">Adv. Financial Mgmt</option>
+        <option value="AUDIT">Adv. Auditing & Ethics</option>
+      </select>
+      <button class="btn-secondary" onclick="exportCSV('lectures')">⬇ Export CSV</button>
+    </div>
+    <div class="tbl-wrap"><table>
+      <thead><tr><th>#</th><th>Lecture Title</th><th>Subject</th><th>Chapter</th><th>Duration</th><th>Video ID</th><th>Visible</th><th>Actions</th></tr></thead>
+      <tbody id="lecTbl"><tr><td colspan="8" class="empty-tbl">Loading...</td></tr></tbody>
+    </table></div>
+  </div>
+
+  <!-- ══ PDFs ══ -->
+  <div class="panel" id="panel-pdfs">
+    <div class="page-hdr">
+      <div><div class="page-title">PDF Notes</div><div class="page-sub">Add, edit or delete PDF documents</div></div>
+      <button class="btn-add" onclick="openModal('pdfModal')">➕ Add PDF</button>
+    </div>
+    <div class="filter-bar">
+      <input class="search-inp" type="text" placeholder="🔍 Search PDFs..." oninput="filterPdf(this.value)">
+      <select onchange="filterPdfSubj(this.value)">
+        <option value="">All Subjects</option>
+        <option value="FR">Financial Reporting</option>
+        <option value="AFM">Adv. Financial Mgmt</option>
+        <option value="AUDIT">Adv. Auditing & Ethics</option>
+      </select>
+    </div>
+    <div class="tbl-wrap"><table>
+      <thead><tr><th>#</th><th>PDF Title</th><th>Subject</th><th>Pages</th><th>Version</th><th>Drive File ID</th><th>Visible</th><th>Actions</th></tr></thead>
+      <tbody id="pdfTbl"><tr><td colspan="8" class="empty-tbl">Loading...</td></tr></tbody>
+    </table></div>
+  </div>
+
+  <!-- ══ ANNOUNCEMENTS ══ -->
+  <div class="panel" id="panel-announcements">
+    <div class="page-hdr">
+      <div><div class="page-title">Announcements</div><div class="page-sub">Post notices that students see on their dashboard</div></div>
+      <button class="btn-add" onclick="openModal('annModal')">➕ New Announcement</button>
+    </div>
+    <div id="annList"><div style="text-align:center;padding:2rem;color:var(--muted);">Loading...</div></div>
+  </div>
+
+  <!-- ══ SUBJECT SETTINGS ══ -->
+  <div class="panel" id="panel-subjects">
+    <div class="page-hdr">
+      <div><div class="page-title">Subject Settings</div><div class="page-sub">Control visibility and descriptions for each subject</div></div>
+    </div>
+
+    <div class="subj-card" id="subj-FR">
+      <div class="subj-hdr">
+        <div class="subj-name">📊 Financial Reporting (FR)</div>
+        <label class="switch"><input type="checkbox" id="vis-FR" checked onchange="saveSubjectVisibility('FR',this.checked)"><span class="slider"></span></label>
+      </div>
+      <textarea class="subj-desc-edit" id="desc-FR" placeholder="Subject description shown to students...">Master the complete Financial Reporting syllabus including Ind AS standards, consolidation, financial instruments, revenue recognition, and ICAI amendments.</textarea>
+      <button class="btn-save-sm" onclick="saveSubjectDesc('FR')">Save Description</button>
+    </div>
+
+    <div class="subj-card" id="subj-AFM">
+      <div class="subj-hdr">
+        <div class="subj-name">📈 Advanced Financial Management (AFM)</div>
+        <label class="switch"><input type="checkbox" id="vis-AFM" checked onchange="saveSubjectVisibility('AFM',this.checked)"><span class="slider"></span></label>
+      </div>
+      <textarea class="subj-desc-edit" id="desc-AFM" placeholder="Subject description...">Master the complete AFM syllabus including derivatives, risk management, portfolio theory, capital structure, foreign exchange management, and mergers & acquisitions.</textarea>
+      <button class="btn-save-sm" onclick="saveSubjectDesc('AFM')">Save Description</button>
+    </div>
+
+    <div class="subj-card" id="subj-AUDIT">
+      <div class="subj-hdr">
+        <div class="subj-name">🔍 Advanced Auditing, Assurance & Professional Ethics</div>
+        <label class="switch"><input type="checkbox" id="vis-AUDIT" checked onchange="saveSubjectVisibility('AUDIT',this.checked)"><span class="slider"></span></label>
+      </div>
+      <textarea class="subj-desc-edit" id="desc-AUDIT" placeholder="Subject description...">Master the complete Auditing syllabus including Standards on Auditing, CARO 2020, company audit, bank audit, professional ethics and quality control.</textarea>
+      <button class="btn-save-sm" onclick="saveSubjectDesc('AUDIT')">Save Description</button>
+    </div>
+
+    <div class="subj-card" style="opacity:0.5;pointer-events:none;">
+      <div class="subj-hdr">
+        <div class="subj-name">🔒 Group 2 Subjects</div>
+        <span class="badge badge-off">Coming Soon</span>
+      </div>
+      <div style="font-size:0.82rem;color:var(--muted);">Group 2 subjects will be configurable here once you enable them.</div>
+    </div>
+  </div>
+
+  <!-- ══ SITE SETTINGS ══ -->
+  <div class="panel" id="panel-site">
+    <div class="page-hdr">
+      <div><div class="page-title">Site Settings</div><div class="page-sub">Control global website behaviour</div></div>
+    </div>
+    <div class="subj-card">
+      <div style="font-family:'Syne',sans-serif;font-weight:700;margin-bottom:1rem;">Feature Toggles</div>
+      <div class="toggle-row">
+        <div><div class="toggle-label">Show Group 2 "Coming Soon"</div><div class="toggle-sub">Display locked Group 2 cards on landing page</div></div>
+        <label class="switch"><input type="checkbox" id="tog-g2" checked onchange="saveSiteSetting('showGroup2',this.checked)"><span class="slider"></span></label>
+      </div>
+      <div class="toggle-row">
+        <div><div class="toggle-label">Student Registration Open</div><div class="toggle-sub">Allow new students to sign up</div></div>
+        <label class="switch"><input type="checkbox" id="tog-reg" checked onchange="saveSiteSetting('registrationOpen',this.checked)"><span class="slider"></span></label>
+      </div>
+      <div class="toggle-row">
+        <div><div class="toggle-label">Show Announcements on Dashboard</div><div class="toggle-sub">Students see your announcements when they log in</div></div>
+        <label class="switch"><input type="checkbox" id="tog-ann" checked onchange="saveSiteSetting('showAnnouncements',this.checked)"><span class="slider"></span></label>
+      </div>
+    </div>
+
+    <div class="subj-card" style="margin-top:1rem;">
+      <div style="font-family:'Syne',sans-serif;font-weight:700;margin-bottom:1rem;">Pricing / Group Labels</div>
+      <div class="form-row">
+        <div class="fg"><label>Group 1 Price Label</label><input type="text" id="g1price" placeholder="e.g. ₹2000" value="₹2000"></div>
+        <div class="fg"><label>Group 2 Price Label</label><input type="text" id="g2price" placeholder="e.g. ₹2000" value="Coming Soon"></div>
+      </div>
+      <div class="fg"><label>Contact / Support Email</label><input type="text" id="supportEmail" placeholder="support@caffinalpro.com"></div>
+      <div class="fg"><label>Site Tagline (shown on landing page)</label><input type="text" id="tagline" placeholder="India's CA Final learning platform..."></div>
+      <button class="btn-save-sm" onclick="saveSiteConfig()">Save Settings</button>
+    </div>
+  </div>
+
+</main>
+
+<!-- ══ LECTURE MODAL ══ -->
+<div class="modal-overlay" id="lecModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('lecModal')">✕</button>
+    <div class="modal-hdr">
+      <div class="modal-title" id="lecModalTitle">Add New Lecture</div>
+      <div class="modal-sub">Fill in all details. Video ID is the part after <code style="font-size:0.78rem;">?v=</code> in the video URL.</div>
+    </div>
+    <input type="hidden" id="lecEditId">
+    <div class="fg"><label>Lecture Title *</label><input type="text" id="lTitle" placeholder="e.g. Ind AS 116 – Leases Full Chapter"></div>
+    <div class="form-row">
+      <div class="fg"><label>Subject *</label>
+        <select id="lSubject">
+          <option value="">Select Subject</option>
+          <option value="FR">Financial Reporting (FR)</option>
+          <option value="AFM">Adv. Financial Mgmt (AFM)</option>
+          <option value="AUDIT">Adv. Auditing & Ethics</option>
+        </select>
+      </div>
+      <div class="fg"><label>Duration</label><input type="text" id="lDuration" placeholder="e.g. 1h 42m"></div>
+    </div>
+    <div class="fg"><label>Chapter Name *</label><input type="text" id="lChapter" placeholder="e.g. Chapter 2 – Ind AS 116: Leases"></div>
+    <div class="fg">
+      <label>Video ID *</label>
+      <input type="text" id="lVideoId" placeholder="e.g. dQw4w9WgXcQ">
+      <div class="hint">📌 From URL: youtube.com/watch?v=<strong>PASTE_THIS_PART</strong></div>
+    </div>
+    <div class="fg"><label>Description (optional)</label><textarea id="lDesc" placeholder="What topics does this lecture cover?"></textarea></div>
+    <div class="form-row">
+      <div class="fg"><label>Order Number</label><input type="number" id="lOrder" placeholder="e.g. 1" min="1"><div class="hint">Sorts lectures within a chapter</div></div>
+      <div class="fg"><label>Visible to Students</label>
+        <select id="lVisible"><option value="true">✅ Visible</option><option value="false">🔒 Hidden</option></select>
+      </div>
+    </div>
+    <button class="btn-submit" id="lecSaveBtn" onclick="saveLecture()">Save Lecture</button>
+  </div>
+</div>
+
+<!-- ══ PDF MODAL ══ -->
+<div class="modal-overlay" id="pdfModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('pdfModal')">✕</button>
+    <div class="modal-hdr">
+      <div class="modal-title" id="pdfModalTitle">Add New PDF</div>
+      <div class="modal-sub">Upload PDF to Google Drive → Share publicly → Paste File ID below.</div>
+    </div>
+    <input type="hidden" id="pdfEditId">
+    <div class="fg"><label>PDF Title *</label><input type="text" id="pTitle" placeholder="e.g. FR – Complete Ind AS Summary Notes"></div>
+    <div class="form-row">
+      <div class="fg"><label>Subject *</label>
+        <select id="pSubject">
+          <option value="">Select Subject</option>
+          <option value="FR">Financial Reporting (FR)</option>
+          <option value="AFM">Adv. Financial Mgmt (AFM)</option>
+          <option value="AUDIT">Adv. Auditing & Ethics</option>
+        </select>
+      </div>
+      <div class="fg"><label>Number of Pages</label><input type="number" id="pPages" placeholder="e.g. 124" min="1"></div>
+    </div>
+    <div class="fg">
+      <label>Google Drive File ID *</label>
+      <input type="text" id="pFileId" placeholder="e.g. 1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs">
+      <div class="hint">📌 From link: drive.google.com/file/d/<strong>PASTE_THIS_PART</strong>/view</div>
+    </div>
+    <div class="form-row">
+      <div class="fg"><label>Version / Updated Label</label><input type="text" id="pVersion" placeholder="e.g. Updated Nov 2024"></div>
+      <div class="fg"><label>Visible to Students</label>
+        <select id="pVisible"><option value="true">✅ Visible</option><option value="false">🔒 Hidden</option></select>
+      </div>
+    </div>
+    <button class="btn-submit" id="pdfSaveBtn" onclick="savePdf()">Save PDF</button>
+  </div>
+</div>
+
+<!-- ══ ANNOUNCEMENT MODAL ══ -->
+<div class="modal-overlay" id="annModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('annModal')">✕</button>
+    <div class="modal-hdr">
+      <div class="modal-title" id="annModalTitle">New Announcement</div>
+      <div class="modal-sub">This will be visible to all students on their dashboard.</div>
+    </div>
+    <input type="hidden" id="annEditId">
+    <div class="fg"><label>Title *</label><input type="text" id="annTitle" placeholder="e.g. New lectures added for FR Chapter 5"></div>
+    <div class="fg"><label>Message *</label><textarea id="annBody" placeholder="Write the announcement message..."></textarea></div>
+    <div class="form-row">
+      <div class="fg"><label>Icon / Emoji</label><input type="text" id="annIcon" placeholder="e.g. 🎉" maxlength="4"></div>
+      <div class="fg"><label>Type</label>
+        <select id="annType">
+          <option value="info">ℹ️ Info</option>
+          <option value="success">✅ Success</option>
+          <option value="warning">⚠️ Warning</option>
+        </select>
+      </div>
+    </div>
+    <button class="btn-submit" id="annSaveBtn" onclick="saveAnnouncement()">Post Announcement</button>
+  </div>
+</div>
+
+<!-- ══ CONFIRM DELETE ══ -->
+<div class="modal-overlay" id="confirmModal">
+  <div class="modal confirm-modal">
+    <div class="confirm-icon">🗑️</div>
+    <div class="modal-title" style="margin-bottom:0.5rem;">Confirm Delete</div>
+    <div class="confirm-msg" id="confirmMsg">Are you sure? This cannot be undone.</div>
+    <div class="confirm-btns">
+      <button class="btn-cancel" onclick="closeModal('confirmModal')">Cancel</button>
+      <button class="btn-delete-confirm" id="confirmBtn">Delete</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
+import {
+  getFirestore, collection, addDoc, getDocs, doc, deleteDoc, updateDoc,
+  query, orderBy, serverTimestamp, setDoc, getDoc
+} from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+
+// ⚠️ REPLACE WITH YOUR FIREBASE CONFIG
+const firebaseConfig = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_PROJECT.firebaseapp.com",
+  projectId: "YOUR_PROJECT_ID",
+  storageBucket: "YOUR_PROJECT.appspot.com",
+  messagingSenderId: "YOUR_SENDER_ID",
+  appId: "YOUR_APP_ID"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+// ⚠️ PUT YOUR ADMIN EMAIL HERE
+const ADMIN_EMAIL = "YOUR_ADMIN_EMAIL@gmail.com";
+
+let allLectures = [], allPdfs = [], allAnn = [];
+
+// AUTH
+onAuthStateChanged(auth, user => {
+  if (user && user.email === ADMIN_EMAIL) {
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('sbName').textContent = user.displayName || 'Admin';
+    document.getElementById('sbEmail').textContent = user.email;
+    document.getElementById('sbAvatar').textContent = (user.displayName || 'A').charAt(0).toUpperCase();
+    loadAll();
+  } else if (user) {
+    signOut(auth);
+    showLoginErr('Access denied. Not an admin account.');
+  }
+});
+
+window.doLogin = async () => {
+  const email = document.getElementById('loginEmail').value.trim();
+  const pass  = document.getElementById('loginPassword').value;
+  const btn   = document.getElementById('loginBtn');
+  if (!email || !pass) return showLoginErr('Please fill in both fields.');
+  btn.innerHTML = '<span class="spin"></span> Signing in...'; btn.disabled = true;
+  try {
+    await signInWithEmailAndPassword(auth, email, pass);
+  } catch(e) {
+    const m = {'auth/user-not-found':'No account found.','auth/wrong-password':'Incorrect password.','auth/invalid-email':'Invalid email.','auth/too-many-requests':'Too many attempts. Try later.'};
+    showLoginErr(m[e.code] || 'Login failed.');
+    btn.textContent = 'Sign In to Admin Panel'; btn.disabled = false;
+  }
+};
+
+window.doLogout = async () => { await signOut(auth); document.getElementById('loginScreen').style.display = 'flex'; };
+function showLoginErr(msg) { document.getElementById('loginAlert').innerHTML = `<div style="background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);color:#fca5a5;padding:0.6rem 0.85rem;border-radius:8px;font-size:0.8rem;">${msg}</div>`; }
+
+// LOAD ALL
+async function loadAll() {
+  await Promise.all([loadLectures(), loadPdfs(), loadAnnouncements(), loadSiteSettings()]);
+  updateStats();
+  renderRecent();
+}
+
+// ── LECTURES ──
+async function loadLectures() {
+  const snap = await getDocs(query(collection(db,'lectures'), orderBy('createdAt','desc')));
+  allLectures = snap.docs.map(d => ({id:d.id,...d.data()}));
+  renderLectures(allLectures);
+  document.getElementById('cnt-lec').textContent = allLectures.length;
+}
+
+function renderLectures(data) {
+  const tbody = document.getElementById('lecTbl');
+  if (!data.length) { tbody.innerHTML = `<tr><td colspan="8"><div class="empty-tbl"><div class="ei">🎬</div>No lectures yet. Click "Add Lecture" above.</div></td></tr>`; return; }
+  tbody.innerHTML = data.map((l,i) => `
+    <tr>
+      <td style="color:var(--muted);font-size:0.75rem;">${i+1}</td>
+      <td><div class="td-main">${l.title}</div><div class="td-sub">${l.description||''}</div></td>
+      <td><span class="badge badge-${(l.subject||'').toLowerCase()}">${l.subject||'–'}</span></td>
+      <td style="font-size:0.78rem;color:var(--muted);max-width:150px;">${l.chapter||'–'}</td>
+      <td style="font-size:0.78rem;">⏱ ${l.duration||'–'}</td>
+      <td><code onclick="copyText('${l.videoId}')" title="Click to copy" style="cursor:pointer;">${l.videoId||'–'}</code></td>
+      <td><span class="badge ${l.visible===false?'badge-off':'badge-on'}">${l.visible===false?'Hidden':'Visible'}</span></td>
+      <td>
+        <div class="act-btns">
+          <button class="btn-ic preview" title="Preview" onclick="window.open('watch.html?v=${l.videoId}&s=${l.subject}','_blank')">▶️</button>
+          <button class="btn-ic toggle" title="Toggle visibility" onclick="toggleVisibility('lectures','${l.id}',${l.visible!==false})">👁</button>
+          <button class="btn-ic" title="Edit" onclick="editLecture('${l.id}')">✏️</button>
+          <button class="btn-ic del" title="Delete" onclick="confirmDel('lectures','${l.id}','${esc(l.title)}')">🗑️</button>
+        </div>
+      </td>
+    </tr>`).join('');
+}
+
+window.saveLecture = async () => {
+  const title   = document.getElementById('lTitle').value.trim();
+  const subject = document.getElementById('lSubject').value;
+  const chapter = document.getElementById('lChapter').value.trim();
+  const videoId = document.getElementById('lVideoId').value.trim();
+  const duration= document.getElementById('lDuration').value.trim();
+  const desc    = document.getElementById('lDesc').value.trim();
+  const order   = parseInt(document.getElementById('lOrder').value)||99;
+  const visible = document.getElementById('lVisible').value === 'true';
+  const editId  = document.getElementById('lecEditId').value;
+  if (!title||!subject||!chapter||!videoId) return toast('Fill in all required fields (*).','error');
+  const btn = document.getElementById('lecSaveBtn');
+  btn.disabled=true; btn.innerHTML='<span class="spin"></span> Saving...';
+  const data = {title,subject,chapter,videoId,duration,description:desc,order,visible};
+  try {
+    if (editId) { await updateDoc(doc(db,'lectures',editId),data); toast('✅ Lecture updated!'); }
+    else { await addDoc(collection(db,'lectures'),{...data,createdAt:serverTimestamp()}); toast('✅ Lecture added!'); }
+    closeModal('lecModal'); await loadLectures(); updateStats(); renderRecent();
+  } catch(e) { toast('❌ '+e.message,'error'); }
+  btn.disabled=false; btn.textContent='Save Lecture';
+};
+
+window.editLecture = id => {
+  const l = allLectures.find(x=>x.id===id); if(!l) return;
+  document.getElementById('lecModalTitle').textContent='Edit Lecture';
+  document.getElementById('lecEditId').value=id;
+  document.getElementById('lTitle').value=l.title||'';
+  document.getElementById('lSubject').value=l.subject||'';
+  document.getElementById('lChapter').value=l.chapter||'';
+  document.getElementById('lVideoId').value=l.videoId||'';
+  document.getElementById('lDuration').value=l.duration||'';
+  document.getElementById('lDesc').value=l.description||'';
+  document.getElementById('lOrder').value=l.order||'';
+  document.getElementById('lVisible').value=l.visible===false?'false':'true';
+  document.getElementById('lecSaveBtn').textContent='Update Lecture';
+  openModal('lecModal');
+};
+
+// ── PDFs ──
+async function loadPdfs() {
+  const snap = await getDocs(query(collection(db,'pdfs'), orderBy('createdAt','desc')));
+  allPdfs = snap.docs.map(d => ({id:d.id,...d.data()}));
+  renderPdfs(allPdfs);
+  document.getElementById('cnt-pdf').textContent = allPdfs.length;
+}
+
+function renderPdfs(data) {
+  const tbody = document.getElementById('pdfTbl');
+  if (!data.length) { tbody.innerHTML = `<tr><td colspan="8"><div class="empty-tbl"><div class="ei">📄</div>No PDFs yet. Click "Add PDF" above.</div></td></tr>`; return; }
+  tbody.innerHTML = data.map((p,i) => `
+    <tr>
+      <td style="color:var(--muted);font-size:0.75rem;">${i+1}</td>
+      <td><div class="td-main">${p.title}</div><div class="td-sub">${p.version||''}</div></td>
+      <td><span class="badge badge-${(p.subject||'').toLowerCase()}">${p.subject||'–'}</span></td>
+      <td style="font-size:0.78rem;">${p.pages?p.pages+' pages':'–'}</td>
+      <td style="font-size:0.78rem;color:var(--muted);">${p.version||'–'}</td>
+      <td><code onclick="copyText('${p.fileId}')" title="Click to copy" style="cursor:pointer;">${p.fileId||'–'}</code></td>
+      <td><span class="badge ${p.visible===false?'badge-off':'badge-on'}">${p.visible===false?'Hidden':'Visible'}</span></td>
+      <td>
+        <div class="act-btns">
+          <button class="btn-ic preview" title="Preview PDF" onclick="window.open('https://drive.google.com/file/d/${p.fileId}/view','_blank')">👁️</button>
+          <button class="btn-ic toggle" title="Toggle visibility" onclick="toggleVisibility('pdfs','${p.id}',${p.visible!==false})">👁</button>
+          <button class="btn-ic" title="Edit" onclick="editPdf('${p.id}')">✏️</button>
+          <button class="btn-ic del" title="Delete" onclick="confirmDel('pdfs','${p.id}','${esc(p.title)}')">🗑️</button>
+        </div>
+      </td>
+    </tr>`).join('');
+}
+
+window.savePdf = async () => {
+  const title   = document.getElementById('pTitle').value.trim();
+  const subject = document.getElementById('pSubject').value;
+  const fileId  = document.getElementById('pFileId').value.trim();
+  const pages   = document.getElementById('pPages').value;
+  const version = document.getElementById('pVersion').value.trim();
+  const visible = document.getElementById('pVisible').value === 'true';
+  const editId  = document.getElementById('pdfEditId').value;
+  if (!title||!subject||!fileId) return toast('Fill in all required fields (*).','error');
+  const btn = document.getElementById('pdfSaveBtn');
+  btn.disabled=true; btn.innerHTML='<span class="spin"></span> Saving...';
+  const data = {title,subject,fileId,pages:pages?parseInt(pages):null,version,visible};
+  try {
+    if (editId) { await updateDoc(doc(db,'pdfs',editId),data); toast('✅ PDF updated!'); }
+    else { await addDoc(collection(db,'pdfs'),{...data,createdAt:serverTimestamp()}); toast('✅ PDF added!'); }
+    closeModal('pdfModal'); await loadPdfs(); updateStats(); renderRecent();
+  } catch(e) { toast('❌ '+e.message,'error'); }
+  btn.disabled=false; btn.textContent='Save PDF';
+};
+
+window.editPdf = id => {
+  const p = allPdfs.find(x=>x.id===id); if(!p) return;
+  document.getElementById('pdfModalTitle').textContent='Edit PDF';
+  document.getElementById('pdfEditId').value=id;
+  document.getElementById('pTitle').value=p.title||'';
+  document.getElementById('pSubject').value=p.subject||'';
+  document.getElementById('pFileId').value=p.fileId||'';
+  document.getElementById('pPages').value=p.pages||'';
+  document.getElementById('pVersion').value=p.version||'';
+  document.getElementById('pVisible').value=p.visible===false?'false':'true';
+  document.getElementById('pdfSaveBtn').textContent='Update PDF';
+  openModal('pdfModal');
+};
+
+// ── TOGGLE VISIBILITY ──
+window.toggleVisibility = async (col, id, currentVisible) => {
+  try {
+    await updateDoc(doc(db,col,id),{visible:!currentVisible});
+    toast((!currentVisible?'✅ Now visible':'🔒 Hidden')+' successfully!');
+    if(col==='lectures') await loadLectures();
+    else await loadPdfs();
+  } catch(e) { toast('❌ '+e.message,'error'); }
+};
+
+// ── ANNOUNCEMENTS ──
+async function loadAnnouncements() {
+  try {
+    const snap = await getDocs(query(collection(db,'announcements'), orderBy('createdAt','desc')));
+    allAnn = snap.docs.map(d=>({id:d.id,...d.data()}));
+    renderAnnouncements();
+  } catch(e) { console.error(e); }
+}
+
+function renderAnnouncements() {
+  const div = document.getElementById('annList');
+  if(!allAnn.length) { div.innerHTML=`<div style="text-align:center;padding:2rem;color:var(--muted);">📢 No announcements yet. Post one above.</div>`; return; }
+  div.innerHTML = allAnn.map(a => `
+    <div class="ann-card">
+      <div class="ann-icon">${a.icon||'📢'}</div>
+      <div style="flex:1">
+        <div class="ann-title">${a.title}</div>
+        <div class="ann-body">${a.body}</div>
+        <div style="font-size:0.7rem;color:var(--muted);margin-top:0.4rem;">${a.createdAt?.toDate?a.createdAt.toDate().toLocaleDateString('en-IN'):''}</div>
+      </div>
+      <div class="ann-actions">
+        <button class="btn-ic" onclick="editAnn('${a.id}')">✏️</button>
+        <button class="btn-ic del" onclick="confirmDel('announcements','${a.id}','${esc(a.title)}')">🗑️</button>
+      </div>
+    </div>`).join('');
+}
+
+window.saveAnnouncement = async () => {
+  const title  = document.getElementById('annTitle').value.trim();
+  const body   = document.getElementById('annBody').value.trim();
+  const icon   = document.getElementById('annIcon').value.trim()||'📢';
+  const type   = document.getElementById('annType').value;
+  const editId = document.getElementById('annEditId').value;
+  if (!title||!body) return toast('Title and message are required.','error');
+  const btn = document.getElementById('annSaveBtn');
+  btn.disabled=true; btn.innerHTML='<span class="spin"></span> Posting...';
+  try {
+    if(editId) { await updateDoc(doc(db,'announcements',editId),{title,body,icon,type}); toast('✅ Updated!'); }
+    else { await addDoc(collection(db,'announcements'),{title,body,icon,type,createdAt:serverTimestamp()}); toast('✅ Announcement posted!'); }
+    closeModal('annModal'); await loadAnnouncements();
+  } catch(e) { toast('❌ '+e.message,'error'); }
+  btn.disabled=false; btn.textContent='Post Announcement';
+};
+
+window.editAnn = id => {
+  const a = allAnn.find(x=>x.id===id); if(!a) return;
+  document.getElementById('annModalTitle').textContent='Edit Announcement';
+  document.getElementById('annEditId').value=id;
+  document.getElementById('annTitle').value=a.title||'';
+  document.getElementById('annBody').value=a.body||'';
+  document.getElementById('annIcon').value=a.icon||'';
+  document.getElementById('annType').value=a.type||'info';
+  document.getElementById('annSaveBtn').textContent='Update Announcement';
+  openModal('annModal');
+};
+
+// ── SUBJECT SETTINGS ──
+async function loadSiteSettings() {
+  try {
+    const snap = await getDoc(doc(db,'settings','site'));
+    if(snap.exists()) {
+      const d = snap.data();
+      if(d.g1price) document.getElementById('g1price').value=d.g1price;
+      if(d.g2price) document.getElementById('g2price').value=d.g2price;
+      if(d.supportEmail) document.getElementById('supportEmail').value=d.supportEmail;
+      if(d.tagline) document.getElementById('tagline').value=d.tagline;
+      if(d.showGroup2!==undefined) document.getElementById('tog-g2').checked=d.showGroup2;
+      if(d.registrationOpen!==undefined) document.getElementById('tog-reg').checked=d.registrationOpen;
+      if(d.showAnnouncements!==undefined) document.getElementById('tog-ann').checked=d.showAnnouncements;
+    }
+    const subjSnap = await getDoc(doc(db,'settings','subjects'));
+    if(subjSnap.exists()) {
+      const d = subjSnap.data();
+      ['FR','AFM','AUDIT'].forEach(s => {
+        if(d[s]?.description) document.getElementById('desc-'+s).value=d[s].description;
+        if(d[s]?.visible!==undefined) document.getElementById('vis-'+s).checked=d[s].visible;
+      });
+    }
+  } catch(e) { console.log('Settings not yet saved.'); }
+}
+
+window.saveSubjectDesc = async (subj) => {
+  const desc = document.getElementById('desc-'+subj).value;
+  try {
+    const ref = doc(db,'settings','subjects');
+    const snap = await getDoc(ref);
+    const existing = snap.exists()?snap.data():{};
+    if(!existing[subj]) existing[subj]={};
+    existing[subj].description = desc;
+    await setDoc(ref, existing);
+    toast('✅ Description saved!');
+  } catch(e) { toast('❌ '+e.message,'error'); }
+};
+
+window.saveSubjectVisibility = async (subj, visible) => {
+  try {
+    const ref = doc(db,'settings','subjects');
+    const snap = await getDoc(ref);
+    const existing = snap.exists()?snap.data():{};
+    if(!existing[subj]) existing[subj]={};
+    existing[subj].visible = visible;
+    await setDoc(ref, existing);
+    toast(`✅ ${subj} ${visible?'visible':'hidden'}!`);
+  } catch(e) { toast('❌ '+e.message,'error'); }
+};
+
+window.saveSiteSetting = async (key, val) => {
+  try {
+    const ref = doc(db,'settings','site');
+    const snap = await getDoc(ref);
+    const existing = snap.exists()?snap.data():{};
+    existing[key] = val;
+    await setDoc(ref, existing);
+    toast('✅ Setting saved!');
+  } catch(e) { toast('❌ '+e.message,'error'); }
+};
+
+window.saveSiteConfig = async () => {
+  try {
+    const ref = doc(db,'settings','site');
+    const snap = await getDoc(ref);
+    const existing = snap.exists()?snap.data():{};
+    Object.assign(existing, {
+      g1price: document.getElementById('g1price').value,
+      g2price: document.getElementById('g2price').value,
+      supportEmail: document.getElementById('supportEmail').value,
+      tagline: document.getElementById('tagline').value
+    });
+    await setDoc(ref, existing);
+    toast('✅ Site settings saved!');
+  } catch(e) { toast('❌ '+e.message,'error'); }
+};
+
+// ── DELETE ──
+let delTarget = null;
+window.confirmDel = (col, id, name) => {
+  delTarget = {col, id};
+  document.getElementById('confirmMsg').textContent = `Delete "${name}"? This cannot be undone.`;
+  document.getElementById('confirmBtn').onclick = doDel;
+  openModal('confirmModal');
+};
+async function doDel() {
+  if(!delTarget) return;
+  try {
+    await deleteDoc(doc(db, delTarget.col, delTarget.id));
+    toast('🗑️ Deleted!');
+    closeModal('confirmModal');
+    if(delTarget.col==='lectures') { await loadLectures(); }
+    else if(delTarget.col==='pdfs') { await loadPdfs(); }
+    else if(delTarget.col==='announcements') { await loadAnnouncements(); }
+    updateStats(); renderRecent();
+  } catch(e) { toast('❌ '+e.message,'error'); }
+  delTarget = null;
+}
+
+// ── FILTER ──
+window.filterLec = v => { v=v.toLowerCase(); renderLectures(allLectures.filter(l=>l.title?.toLowerCase().includes(v)||l.chapter?.toLowerCase().includes(v))); };
+window.filterLecSubj = v => renderLectures(v?allLectures.filter(l=>l.subject===v):allLectures);
+window.filterPdf = v => { v=v.toLowerCase(); renderPdfs(allPdfs.filter(p=>p.title?.toLowerCase().includes(v))); };
+window.filterPdfSubj = v => renderPdfs(v?allPdfs.filter(p=>p.subject===v):allPdfs);
+
+// ── EXPORT CSV ──
+window.exportCSV = (type) => {
+  const data = type==='lectures' ? allLectures : allPdfs;
+  const keys = type==='lectures' ? ['title','subject','chapter','videoId','duration','visible'] : ['title','subject','fileId','pages','version','visible'];
+  const csv = [keys.join(','), ...data.map(r=>keys.map(k=>`"${r[k]||''}"`).join(','))].join('\n');
+  const a = document.createElement('a');
+  a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
+  a.download = type+'.csv'; a.click();
+};
+
+// ── COPY TEXT ──
+window.copyText = text => { navigator.clipboard.writeText(text).then(()=>toast('📋 Copied!')); };
+
+// ── STATS ──
+function updateStats() {
+  document.getElementById('ov-lec').textContent = allLectures.length;
+  document.getElementById('ov-pdf').textContent = allPdfs.length;
+  document.getElementById('cnt-lec').textContent = allLectures.length;
+  document.getElementById('cnt-pdf').textContent = allPdfs.length;
+}
+
+function renderRecent() {
+  const all = [...allLectures.map(l=>({...l,_type:'video'})),...allPdfs.map(p=>({...p,_type:'pdf'}))].slice(0,8);
+  const tbody = document.getElementById('recentTbl');
+  if(!all.length) { tbody.innerHTML=`<tr><td colspan="4" class="empty-tbl">No content yet.</td></tr>`; return; }
+  tbody.innerHTML = all.map(r=>`
+    <tr>
+      <td><div class="td-main">${r.title}</div></td>
+      <td><span class="badge badge-${r._type}">${r._type==='video'?'🎬 Lecture':'📄 PDF'}</span></td>
+      <td><span class="badge badge-${(r.subject||'').toLowerCase()}">${r.subject||'–'}</span></td>
+      <td style="font-size:0.75rem;color:var(--muted);">${r.createdAt?.toDate?r.createdAt.toDate().toLocaleDateString('en-IN'):'Just now'}</td>
+    </tr>`).join('');
+}
+
+// ── MODAL ──
+window.openModal = id => { clearModalForm(id); document.getElementById(id).classList.add('open'); };
+window.closeModal = id => document.getElementById(id).classList.remove('open');
+document.querySelectorAll('.modal-overlay').forEach(o=>o.addEventListener('click',e=>{ if(e.target===o) o.classList.remove('open'); }));
+document.addEventListener('keydown',e=>{ if(e.key==='Escape') document.querySelectorAll('.modal-overlay.open').forEach(o=>o.classList.remove('open')); if(e.key==='Enter'&&document.getElementById('loginScreen').style.display!=='none') window.doLogin(); });
+
+function clearModalForm(id) {
+  if(id==='lecModal'){ document.getElementById('lecModalTitle').textContent='Add New Lecture'; document.getElementById('lecEditId').value=''; ['lTitle','lDuration','lChapter','lVideoId','lDesc','lOrder'].forEach(x=>document.getElementById(x).value=''); document.getElementById('lSubject').value=''; document.getElementById('lVisible').value='true'; document.getElementById('lecSaveBtn').textContent='Save Lecture'; }
+  if(id==='pdfModal'){ document.getElementById('pdfModalTitle').textContent='Add New PDF'; document.getElementById('pdfEditId').value=''; ['pTitle','pFileId','pPages','pVersion'].forEach(x=>document.getElementById(x).value=''); document.getElementById('pSubject').value=''; document.getElementById('pVisible').value='true'; document.getElementById('pdfSaveBtn').textContent='Save PDF'; }
+  if(id==='annModal'){ document.getElementById('annModalTitle').textContent='New Announcement'; document.getElementById('annEditId').value=''; ['annTitle','annBody','annIcon'].forEach(x=>document.getElementById(x).value=''); document.getElementById('annType').value='info'; document.getElementById('annSaveBtn').textContent='Post Announcement'; }
+}
+
+// ── TOAST ──
+window.toast = (msg, type='success') => {
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.className=`toast ${type} show`;
+  setTimeout(()=>t.classList.remove('show'),3000);
+};
+
+function esc(s){ return (s||'').replace(/'/g,"\\'"); }
+</script>
+
+<script>
+window.nav = (name, btn) => {
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.sb-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('panel-'+name).classList.add('active');
+  if(btn) btn.classList.add('active');
+};
+</script>
+
+</body>
+</html>
