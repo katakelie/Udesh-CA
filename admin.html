@@ -1,0 +1,859 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Panel – CAFinalPro</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f; --surface: #12121a; --card: #1a1a26; --card2: #1e1e2e;
+    --border: #2a2a3d; --accent: #f97316; --accent2: #fb923c;
+    --text: #f1f1f8; --muted: #8888aa;
+    --gradient: linear-gradient(135deg, #f97316, #ef4444);
+    --red: #ef4444; --green: #22c55e; --blue: #3b82f6;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; display: flex; min-height: 100vh; }
+
+  /* ── SIDEBAR ── */
+  .sidebar {
+    width: 230px; background: var(--surface); border-right: 1px solid var(--border);
+    display: flex; flex-direction: column; padding: 1.5rem 0;
+    position: fixed; top: 0; left: 0; height: 100vh; z-index: 50;
+  }
+  .sb-logo { font-family:'Syne',sans-serif; font-weight:800; font-size:1.15rem; padding:0 1.25rem; margin-bottom:0.25rem; color:var(--text); }
+  .sb-logo span { color:var(--accent); }
+  .sb-role { font-size:0.7rem; color:var(--accent2); background:rgba(249,115,22,0.1); border:1px solid rgba(249,115,22,0.25); padding:0.15rem 0.6rem; border-radius:4px; margin:0 1.25rem 1.75rem; display:inline-block; font-weight:600; }
+  .sb-section { font-size:0.65rem; text-transform:uppercase; letter-spacing:0.1em; color:rgba(136,136,170,0.45); padding:0 1.25rem; margin:1rem 0 0.4rem; }
+  .sb-link {
+    display:flex; align-items:center; gap:0.65rem; padding:0.6rem 1.25rem;
+    color:var(--muted); text-decoration:none; font-size:0.85rem; font-weight:500;
+    transition:all 0.18s; border-left:2px solid transparent; cursor:pointer; background:none; border-top:none; border-right:none; border-bottom:none; width:100%; font-family:'DM Sans',sans-serif;
+  }
+  .sb-link:hover { color:var(--text); background:rgba(255,255,255,0.03); }
+  .sb-link.active { color:var(--accent); background:rgba(249,115,22,0.07); border-left-color:var(--accent); }
+  .sb-icon { font-size:0.95rem; width:18px; text-align:center; }
+  .sb-bottom { margin-top:auto; padding:1rem 1.25rem; border-top:1px solid var(--border); }
+  .sb-admin { font-size:0.82rem; font-weight:600; margin-bottom:0.15rem; }
+  .sb-email { font-size:0.7rem; color:var(--muted); margin-bottom:0.75rem; }
+  .btn-logout { width:100%; background:transparent; border:1px solid var(--border); color:var(--muted); padding:0.45rem; border-radius:7px; cursor:pointer; font-size:0.78rem; font-family:'DM Sans',sans-serif; transition:all 0.2s; }
+  .btn-logout:hover { border-color:rgba(239,68,68,0.5); color:#fca5a5; }
+
+  /* ── MAIN ── */
+  .main { margin-left:230px; flex:1; padding:2rem 2.5rem; }
+  .top-bar { display:flex; align-items:center; justify-content:space-between; margin-bottom:2rem; }
+  .page-title { font-family:'Syne',sans-serif; font-size:1.4rem; font-weight:800; }
+  .page-sub { font-size:0.82rem; color:var(--muted); margin-top:0.2rem; }
+
+  /* ── STATS ── */
+  .stats-row { display:grid; grid-template-columns:repeat(4,1fr); gap:1rem; margin-bottom:2rem; }
+  .stat-card { background:var(--card); border:1px solid var(--border); border-radius:14px; padding:1.1rem 1.25rem; }
+  .sc-val { font-family:'Syne',sans-serif; font-size:1.9rem; font-weight:800; }
+  .sc-lbl { font-size:0.75rem; color:var(--muted); margin-top:0.2rem; }
+
+  /* ── PANELS ── */
+  .panel { display:none; }
+  .panel.active { display:block; }
+
+  /* ── SECTION HEADER ── */
+  .sec-hdr { display:flex; align-items:center; justify-content:space-between; margin-bottom:1.25rem; }
+  .sec-title { font-family:'Syne',sans-serif; font-size:1rem; font-weight:700; }
+
+  /* ── FILTER BAR ── */
+  .filter-bar { display:flex; gap:0.75rem; margin-bottom:1.25rem; flex-wrap:wrap; }
+  select, .search-input {
+    background:var(--card); border:1px solid var(--border); color:var(--text);
+    padding:0.55rem 0.9rem; border-radius:9px; font-size:0.83rem; font-family:'DM Sans',sans-serif;
+    outline:none; transition:border-color 0.2s;
+  }
+  select:focus, .search-input:focus { border-color:var(--accent); }
+  .search-input { flex:1; min-width:200px; }
+
+  /* ── TABLE ── */
+  .table-wrap { background:var(--card); border:1px solid var(--border); border-radius:14px; overflow:hidden; }
+  table { width:100%; border-collapse:collapse; }
+  thead tr { background:var(--surface); }
+  th { padding:0.75rem 1rem; font-size:0.72rem; text-transform:uppercase; letter-spacing:0.08em; color:var(--muted); font-weight:600; text-align:left; border-bottom:1px solid var(--border); }
+  td { padding:0.85rem 1rem; font-size:0.85rem; border-bottom:1px solid rgba(42,42,61,0.5); vertical-align:middle; }
+  tr:last-child td { border-bottom:none; }
+  tr:hover td { background:rgba(255,255,255,0.015); }
+  .td-title { font-weight:500; max-width:260px; }
+  .td-sub { font-size:0.72rem; color:var(--muted); margin-top:0.15rem; }
+  .badge {
+    display:inline-block; font-size:0.68rem; font-weight:600; padding:0.2rem 0.55rem; border-radius:4px;
+  }
+  .badge-fr { background:rgba(59,130,246,0.12); color:#93c5fd; }
+  .badge-afm { background:rgba(168,85,247,0.12); color:#c4b5fd; }
+  .badge-audit { background:rgba(34,197,94,0.12); color:#86efac; }
+  .badge-pdf { background:rgba(251,191,36,0.12); color:#fde68a; }
+  .badge-video { background:rgba(249,115,22,0.12); color:#fdba74; }
+
+  /* ACTION BTNS */
+  .action-btns { display:flex; gap:0.4rem; }
+  .btn-icon { width:30px; height:30px; border-radius:7px; border:1px solid var(--border); background:transparent; cursor:pointer; font-size:0.8rem; display:flex; align-items:center; justify-content:center; transition:all 0.18s; }
+  .btn-icon:hover { border-color:var(--accent); background:rgba(249,115,22,0.08); }
+  .btn-icon.del:hover { border-color:var(--red); background:rgba(239,68,68,0.08); }
+
+  /* ── ADD BUTTON ── */
+  .btn-add { background:var(--gradient); color:white; border:none; padding:0.55rem 1.1rem; border-radius:9px; font-size:0.83rem; font-weight:600; font-family:'DM Sans',sans-serif; cursor:pointer; transition:opacity 0.2s; display:flex; align-items:center; gap:0.5rem; }
+  .btn-add:hover { opacity:0.88; }
+
+  /* ── MODAL ── */
+  .modal-overlay {
+    position:fixed; inset:0; background:rgba(0,0,0,0.7); z-index:200;
+    display:flex; align-items:center; justify-content:center; padding:1rem;
+    opacity:0; pointer-events:none; transition:opacity 0.2s;
+  }
+  .modal-overlay.open { opacity:1; pointer-events:all; }
+  .modal {
+    background:var(--card); border:1px solid var(--border); border-radius:18px;
+    padding:2rem; width:100%; max-width:520px; position:relative;
+    transform:translateY(20px); transition:transform 0.2s;
+  }
+  .modal-overlay.open .modal { transform:translateY(0); }
+  .modal-title { font-family:'Syne',sans-serif; font-size:1.1rem; font-weight:800; margin-bottom:0.25rem; }
+  .modal-sub { font-size:0.8rem; color:var(--muted); margin-bottom:1.5rem; }
+  .modal-close { position:absolute; top:1.25rem; right:1.25rem; background:var(--border); border:none; color:var(--muted); width:28px; height:28px; border-radius:50%; cursor:pointer; font-size:1rem; display:flex; align-items:center; justify-content:center; transition:all 0.2s; }
+  .modal-close:hover { background:rgba(239,68,68,0.2); color:#fca5a5; }
+
+  /* FORM */
+  .form-group { margin-bottom:1rem; }
+  label { display:block; font-size:0.78rem; font-weight:600; color:var(--muted); margin-bottom:0.4rem; }
+  input[type=text], input[type=url], input[type=number], textarea, select.form-select {
+    width:100%; background:var(--surface); border:1px solid var(--border);
+    color:var(--text); padding:0.7rem 0.9rem; border-radius:10px;
+    font-size:0.88rem; font-family:'DM Sans',sans-serif; outline:none; transition:border-color 0.2s, box-shadow 0.2s;
+  }
+  input:focus, textarea:focus, select.form-select:focus { border-color:var(--accent); box-shadow:0 0 0 3px rgba(249,115,22,0.1); }
+  input::placeholder, textarea::placeholder { color:rgba(136,136,170,0.4); }
+  textarea { resize:vertical; min-height:80px; }
+  .form-row { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
+  .form-hint { font-size:0.72rem; color:var(--muted); margin-top:0.3rem; }
+  .btn-submit { width:100%; background:var(--gradient); color:white; border:none; padding:0.8rem; border-radius:10px; font-size:0.95rem; font-weight:600; font-family:'DM Sans',sans-serif; cursor:pointer; transition:opacity 0.2s; margin-top:0.5rem; }
+  .btn-submit:hover { opacity:0.88; }
+  .btn-submit:disabled { opacity:0.5; cursor:not-allowed; }
+
+  /* CONFIRM MODAL */
+  .confirm-modal { max-width:380px; text-align:center; }
+  .confirm-icon { font-size:2.5rem; margin-bottom:1rem; }
+  .confirm-msg { color:var(--muted); font-size:0.88rem; margin-bottom:1.5rem; line-height:1.6; }
+  .confirm-btns { display:flex; gap:0.75rem; justify-content:center; }
+  .btn-cancel { background:transparent; border:1px solid var(--border); color:var(--text); padding:0.65rem 1.5rem; border-radius:9px; cursor:pointer; font-family:'DM Sans',sans-serif; font-size:0.85rem; transition:all 0.2s; }
+  .btn-cancel:hover { border-color:var(--muted); }
+  .btn-delete { background:rgba(239,68,68,0.15); border:1px solid rgba(239,68,68,0.4); color:#fca5a5; padding:0.65rem 1.5rem; border-radius:9px; cursor:pointer; font-family:'DM Sans',sans-serif; font-size:0.85rem; font-weight:600; transition:all 0.2s; }
+  .btn-delete:hover { background:rgba(239,68,68,0.25); }
+
+  /* TOAST */
+  .toast {
+    position:fixed; bottom:2rem; right:2rem; z-index:500;
+    background:var(--card); border:1px solid var(--border); border-radius:12px;
+    padding:0.85rem 1.25rem; font-size:0.85rem; font-weight:500;
+    display:flex; align-items:center; gap:0.6rem; box-shadow:0 8px 32px rgba(0,0,0,0.4);
+    transform:translateY(80px); opacity:0; transition:all 0.3s;
+  }
+  .toast.show { transform:translateY(0); opacity:1; }
+  .toast.success { border-color:rgba(34,197,94,0.4); }
+  .toast.error { border-color:rgba(239,68,68,0.4); }
+
+  /* EMPTY STATE */
+  .empty { text-align:center; padding:4rem 2rem; color:var(--muted); }
+  .empty-icon { font-size:3rem; margin-bottom:1rem; }
+  .empty-title { font-family:'Syne',sans-serif; font-weight:700; margin-bottom:0.5rem; color:var(--text); }
+
+  /* LOGIN SCREEN */
+  #loginScreen {
+    position:fixed; inset:0; background:var(--bg); z-index:1000;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .login-box { background:var(--card); border:1px solid var(--border); border-radius:20px; padding:2.5rem; width:100%; max-width:380px; }
+  .login-logo { font-family:'Syne',sans-serif; font-weight:800; font-size:1.3rem; margin-bottom:0.25rem; }
+  .login-logo span { color:var(--accent); }
+  .login-role { font-size:0.75rem; color:var(--accent2); margin-bottom:1.75rem; }
+  .login-title { font-family:'Syne',sans-serif; font-size:1.2rem; font-weight:800; margin-bottom:0.25rem; }
+  .login-sub { font-size:0.82rem; color:var(--muted); margin-bottom:1.5rem; }
+
+  .spinner { display:inline-block; width:14px; height:14px; border:2px solid rgba(255,255,255,0.3); border-top-color:white; border-radius:50%; animation:spin 0.7s linear infinite; }
+  @keyframes spin { to{transform:rotate(360deg)} }
+
+  @media(max-width:900px) {
+    .sidebar { display:none; }
+    .main { margin-left:0; padding:1rem; }
+    .stats-row { grid-template-columns:1fr 1fr; }
+    .form-row { grid-template-columns:1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- LOGIN SCREEN -->
+<div id="loginScreen">
+  <div class="login-box">
+    <div class="login-logo">CA<span>Final</span>Pro</div>
+    <div class="login-role">🔐 Admin Access Only</div>
+    <div class="login-title">Admin Login</div>
+    <div class="login-sub">Sign in with your admin account to manage content.</div>
+    <div id="loginAlert" style="margin-bottom:1rem;"></div>
+    <div class="form-group">
+      <label>Email</label>
+      <input type="text" id="loginEmail" placeholder="admin@caffinalpro.com">
+    </div>
+    <div class="form-group">
+      <label>Password</label>
+      <input type="text" id="loginPassword" placeholder="Your password" style="-webkit-text-security:disc;">
+    </div>
+    <button class="btn-submit" id="loginBtn" onclick="doLogin()">Sign In to Admin Panel</button>
+  </div>
+</div>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div style="padding:0 1.25rem;">
+    <div class="sb-logo">CA<span>Final</span>Pro</div>
+    <div class="sb-role">⚙️ Admin Panel</div>
+  </div>
+  <span class="sb-section">Overview</span>
+  <button class="sb-link active" onclick="switchPanel('overview',this)"><span class="sb-icon">📊</span> Dashboard</button>
+  <span class="sb-section">Content</span>
+  <button class="sb-link" onclick="switchPanel('lectures',this)"><span class="sb-icon">🎬</span> Lectures</button>
+  <button class="sb-link" onclick="switchPanel('pdfs',this)"><span class="sb-icon">📄</span> PDF Notes</button>
+  <span class="sb-section">Site</span>
+  <button class="sb-link" onclick="window.open('index.html','_blank')"><span class="sb-icon">🌐</span> View Website</button>
+  <button class="sb-link" onclick="window.open('dashboard.html','_blank')"><span class="sb-icon">👤</span> Student View</button>
+  <div class="sb-bottom">
+    <div class="sb-admin" id="sbAdminName">Admin</div>
+    <div class="sb-email" id="sbAdminEmail"></div>
+    <button class="btn-logout" onclick="doLogout()">Sign Out</button>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+
+  <!-- ═══ OVERVIEW PANEL ═══ -->
+  <div class="panel active" id="panel-overview">
+    <div class="top-bar">
+      <div>
+        <div class="page-title">Admin Dashboard</div>
+        <div class="page-sub">Manage your lectures and PDF notes</div>
+      </div>
+    </div>
+
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="sc-val" id="stat-total-lectures">–</div>
+        <div class="sc-lbl">Total Lectures</div>
+      </div>
+      <div class="stat-card">
+        <div class="sc-val" id="stat-total-pdfs">–</div>
+        <div class="sc-lbl">Total PDFs</div>
+      </div>
+      <div class="stat-card">
+        <div class="sc-val">3</div>
+        <div class="sc-lbl">Subjects (Group 1)</div>
+      </div>
+      <div class="stat-card">
+        <div class="sc-val" style="color:var(--accent2)">G2</div>
+        <div class="sc-lbl">Group 2 – Coming Soon</div>
+      </div>
+    </div>
+
+    <!-- Quick add shortcuts -->
+    <div class="sec-hdr" style="margin-top:1rem;">
+      <div class="sec-title">Quick Actions</div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:2rem;">
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1.5rem;cursor:pointer;transition:border-color 0.2s;" onmouseenter="this.style.borderColor='var(--accent)'" onmouseleave="this.style.borderColor='var(--border)'" onclick="switchPanel('lectures',null);setTimeout(()=>openAddModal('lecture'),100)">
+        <div style="font-size:1.8rem;margin-bottom:0.75rem;">➕🎬</div>
+        <div style="font-family:'Syne',sans-serif;font-weight:700;margin-bottom:0.3rem;">Add Lecture</div>
+        <div style="font-size:0.8rem;color:var(--muted);">Upload a new video lecture link</div>
+      </div>
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1.5rem;cursor:pointer;transition:border-color 0.2s;" onmouseenter="this.style.borderColor='var(--accent)'" onmouseleave="this.style.borderColor='var(--border)'" onclick="switchPanel('pdfs',null);setTimeout(()=>openAddModal('pdf'),100)">
+        <div style="font-size:1.8rem;margin-bottom:0.75rem;">➕📄</div>
+        <div style="font-family:'Syne',sans-serif;font-weight:700;margin-bottom:0.3rem;">Add PDF</div>
+        <div style="font-size:0.8rem;color:var(--muted);">Add a PDF note or document</div>
+      </div>
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1.5rem;cursor:pointer;transition:border-color 0.2s;" onmouseenter="this.style.borderColor='var(--accent)'" onmouseleave="this.style.borderColor='var(--border)'" onclick="switchPanel('lectures',null)">
+        <div style="font-size:1.8rem;margin-bottom:0.75rem;">📋🎬</div>
+        <div style="font-family:'Syne',sans-serif;font-weight:700;margin-bottom:0.3rem;">Manage Lectures</div>
+        <div style="font-size:0.8rem;color:var(--muted);">Edit or delete existing lectures</div>
+      </div>
+    </div>
+
+    <!-- Recent content -->
+    <div class="sec-hdr">
+      <div class="sec-title">Recently Added</div>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Title</th><th>Type</th><th>Subject</th><th>Chapter</th><th>Added</th></tr></thead>
+        <tbody id="recentTable"><tr><td colspan="5" style="text-align:center;color:var(--muted);padding:2rem;">Loading...</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ═══ LECTURES PANEL ═══ -->
+  <div class="panel" id="panel-lectures">
+    <div class="top-bar">
+      <div>
+        <div class="page-title">Lectures</div>
+        <div class="page-sub">Add, edit or delete video lectures</div>
+      </div>
+      <button class="btn-add" onclick="openAddModal('lecture')">➕ Add Lecture</button>
+    </div>
+
+    <div class="filter-bar">
+      <input class="search-input" type="text" placeholder="🔍 Search lectures..." oninput="filterTable('lectures',this.value)">
+      <select onchange="filterBySubject('lectures',this.value)">
+        <option value="">All Subjects</option>
+        <option value="FR">Financial Reporting</option>
+        <option value="AFM">Adv. Financial Mgmt</option>
+        <option value="AUDIT">Adv. Auditing & Ethics</option>
+      </select>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Lecture Title</th>
+            <th>Subject</th>
+            <th>Chapter</th>
+            <th>Duration</th>
+            <th>Video ID</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="lecturesTable">
+          <tr><td colspan="7" style="text-align:center;color:var(--muted);padding:2rem;">Loading...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ═══ PDFs PANEL ═══ -->
+  <div class="panel" id="panel-pdfs">
+    <div class="top-bar">
+      <div>
+        <div class="page-title">PDF Notes</div>
+        <div class="page-sub">Add, edit or delete PDF documents</div>
+      </div>
+      <button class="btn-add" onclick="openAddModal('pdf')">➕ Add PDF</button>
+    </div>
+
+    <div class="filter-bar">
+      <input class="search-input" type="text" placeholder="🔍 Search PDFs..." oninput="filterTable('pdfs',this.value)">
+      <select onchange="filterBySubject('pdfs',this.value)">
+        <option value="">All Subjects</option>
+        <option value="FR">Financial Reporting</option>
+        <option value="AFM">Adv. Financial Mgmt</option>
+        <option value="AUDIT">Adv. Auditing & Ethics</option>
+      </select>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>PDF Title</th>
+            <th>Subject</th>
+            <th>Pages</th>
+            <th>Drive File ID</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="pdfsTable">
+          <tr><td colspan="6" style="text-align:center;color:var(--muted);padding:2rem;">Loading...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</main>
+
+<!-- ═══ ADD/EDIT LECTURE MODAL ═══ -->
+<div class="modal-overlay" id="lectureModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('lectureModal')">✕</button>
+    <div class="modal-title" id="lectureModalTitle">Add New Lecture</div>
+    <div class="modal-sub">Fill in the details below. The video ID is the part after <code style="background:var(--surface);padding:0.1rem 0.4rem;border-radius:4px;font-size:0.8rem;">?v=</code> in the video URL.</div>
+    <input type="hidden" id="lectureEditId">
+    <div class="form-group">
+      <label>Lecture Title *</label>
+      <input type="text" id="lTitle" placeholder="e.g. Ind AS 116 – Leases Full Chapter">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Subject *</label>
+        <select class="form-select" id="lSubject">
+          <option value="">Select Subject</option>
+          <option value="FR">Financial Reporting (FR)</option>
+          <option value="AFM">Adv. Financial Mgmt (AFM)</option>
+          <option value="AUDIT">Adv. Auditing & Ethics</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Duration *</label>
+        <input type="text" id="lDuration" placeholder="e.g. 1h 42m">
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Chapter Name *</label>
+      <input type="text" id="lChapter" placeholder="e.g. Chapter 2 – Ind AS 116: Leases">
+    </div>
+    <div class="form-group">
+      <label>Video ID *</label>
+      <input type="text" id="lVideoId" placeholder="e.g. dQw4w9WgXcQ">
+      <div class="form-hint">Get this from the video URL: youtube.com/watch?v=<strong>THIS_PART</strong></div>
+    </div>
+    <div class="form-group">
+      <label>Description (optional)</label>
+      <textarea id="lDesc" placeholder="Brief description of what this lecture covers..."></textarea>
+    </div>
+    <div class="form-group">
+      <label>Order / Lecture Number</label>
+      <input type="number" id="lOrder" placeholder="e.g. 1" min="1">
+      <div class="form-hint">Used to sort lectures within a chapter</div>
+    </div>
+    <button class="btn-submit" id="saveLectureBtn" onclick="saveLecture()">Save Lecture</button>
+  </div>
+</div>
+
+<!-- ═══ ADD/EDIT PDF MODAL ═══ -->
+<div class="modal-overlay" id="pdfModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('pdfModal')">✕</button>
+    <div class="modal-title" id="pdfModalTitle">Add New PDF</div>
+    <div class="modal-sub">Upload your PDF to Google Drive, share it publicly, and paste the File ID below.</div>
+    <input type="hidden" id="pdfEditId">
+    <div class="form-group">
+      <label>PDF Title *</label>
+      <input type="text" id="pTitle" placeholder="e.g. FR – Complete Ind AS Summary Notes">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Subject *</label>
+        <select class="form-select" id="pSubject">
+          <option value="">Select Subject</option>
+          <option value="FR">Financial Reporting (FR)</option>
+          <option value="AFM">Adv. Financial Mgmt (AFM)</option>
+          <option value="AUDIT">Adv. Auditing & Ethics</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Number of Pages</label>
+        <input type="number" id="pPages" placeholder="e.g. 124" min="1">
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Google Drive File ID *</label>
+      <input type="text" id="pFileId" placeholder="e.g. 1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs">
+      <div class="form-hint">From Drive share link: drive.google.com/file/d/<strong>THIS_PART</strong>/view</div>
+    </div>
+    <div class="form-group">
+      <label>Updated / Version Label</label>
+      <input type="text" id="pVersion" placeholder="e.g. Updated Nov 2024">
+    </div>
+    <button class="btn-submit" id="savePdfBtn" onclick="savePdf()">Save PDF</button>
+  </div>
+</div>
+
+<!-- ═══ CONFIRM DELETE MODAL ═══ -->
+<div class="modal-overlay" id="confirmModal">
+  <div class="modal confirm-modal">
+    <div class="confirm-icon">🗑️</div>
+    <div class="modal-title" style="margin-bottom:0.5rem;">Delete Item?</div>
+    <div class="confirm-msg" id="confirmMsg">Are you sure you want to delete this item? This action cannot be undone.</div>
+    <div class="confirm-btns">
+      <button class="btn-cancel" onclick="closeModal('confirmModal')">Cancel</button>
+      <button class="btn-delete" id="confirmDeleteBtn">Delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- ═══ FIREBASE + APP LOGIC ═══ -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
+import {
+  getFirestore, collection, addDoc, getDocs, doc, deleteDoc, updateDoc,
+  query, orderBy, serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+
+// ⚠️ REPLACE WITH YOUR FIREBASE CONFIG
+const firebaseConfig = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_PROJECT.firebaseapp.com",
+  projectId: "YOUR_PROJECT_ID",
+  storageBucket: "YOUR_PROJECT.appspot.com",
+  messagingSenderId: "YOUR_SENDER_ID",
+  appId: "YOUR_APP_ID"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+// ── ADMIN EMAIL WHITELIST ──
+// Only these emails can access admin panel
+const ADMIN_EMAILS = [
+  "youradmin@gmail.com"  // ⚠️ REPLACE WITH YOUR ADMIN EMAIL
+];
+
+// ── AUTH ──
+onAuthStateChanged(auth, user => {
+  if (user && ADMIN_EMAILS.includes(user.email)) {
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('sbAdminName').textContent = user.displayName || 'Admin';
+    document.getElementById('sbAdminEmail').textContent = user.email;
+    loadAll();
+  } else if (user) {
+    // Logged in but not admin
+    showToast('❌ Access denied. Not an admin account.', 'error');
+    signOut(auth);
+  }
+});
+
+window.doLogin = async () => {
+  const email = document.getElementById('loginEmail').value.trim();
+  const pass = document.getElementById('loginPassword').value;
+  const btn = document.getElementById('loginBtn');
+  if (!email || !pass) return showLoginAlert('Please enter email and password.');
+  btn.innerHTML = '<span class="spinner"></span> Signing in...';
+  btn.disabled = true;
+  try {
+    await signInWithEmailAndPassword(auth, email, pass);
+  } catch(e) {
+    const msgs = {
+      'auth/user-not-found': 'No account found with this email.',
+      'auth/wrong-password': 'Incorrect password.',
+      'auth/invalid-email': 'Invalid email address.',
+      'auth/too-many-requests': 'Too many attempts. Try again later.'
+    };
+    showLoginAlert(msgs[e.code] || 'Login failed. Check your credentials.');
+    btn.innerHTML = 'Sign In to Admin Panel';
+    btn.disabled = false;
+  }
+};
+
+window.doLogout = async () => {
+  await signOut(auth);
+  document.getElementById('loginScreen').style.display = 'flex';
+};
+
+function showLoginAlert(msg) {
+  document.getElementById('loginAlert').innerHTML = `<div style="background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);color:#fca5a5;padding:0.65rem 0.9rem;border-radius:8px;font-size:0.82rem;">${msg}</div>`;
+}
+
+// ── DATA ──
+let allLectures = [];
+let allPdfs = [];
+
+async function loadAll() {
+  await Promise.all([loadLectures(), loadPdfs()]);
+  updateStats();
+  renderRecentTable();
+}
+
+async function loadLectures() {
+  const q = query(collection(db, 'lectures'), orderBy('createdAt', 'desc'));
+  const snap = await getDocs(q);
+  allLectures = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  renderLecturesTable(allLectures);
+}
+
+async function loadPdfs() {
+  const q = query(collection(db, 'pdfs'), orderBy('createdAt', 'desc'));
+  const snap = await getDocs(q);
+  allPdfs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  renderPdfsTable(allPdfs);
+}
+
+function updateStats() {
+  document.getElementById('stat-total-lectures').textContent = allLectures.length;
+  document.getElementById('stat-total-pdfs').textContent = allPdfs.length;
+}
+
+// ── RENDER LECTURES TABLE ──
+function renderLecturesTable(data) {
+  const tbody = document.getElementById('lecturesTable');
+  if (!data.length) {
+    tbody.innerHTML = `<tr><td colspan="7"><div class="empty"><div class="empty-icon">🎬</div><div class="empty-title">No lectures yet</div><div>Click "Add Lecture" to get started</div></div></td></tr>`;
+    return;
+  }
+  tbody.innerHTML = data.map((l, i) => `
+    <tr>
+      <td style="color:var(--muted);font-size:0.78rem;">${i+1}</td>
+      <td>
+        <div class="td-title">${l.title}</div>
+        <div class="td-sub">${l.description || ''}</div>
+      </td>
+      <td><span class="badge badge-${l.subject?.toLowerCase()}">${l.subject || '–'}</span></td>
+      <td style="font-size:0.8rem;color:var(--muted);max-width:160px;">${l.chapter || '–'}</td>
+      <td style="font-size:0.8rem;">⏱ ${l.duration || '–'}</td>
+      <td><code style="background:var(--surface);padding:0.2rem 0.5rem;border-radius:5px;font-size:0.72rem;color:var(--accent2);">${l.videoId || '–'}</code></td>
+      <td>
+        <div class="action-btns">
+          <button class="btn-icon" title="Edit" onclick="editLecture('${l.id}')">✏️</button>
+          <button class="btn-icon del" title="Delete" onclick="confirmDelete('lecture','${l.id}','${l.title.replace(/'/g,"\\'")}')">🗑️</button>
+        </div>
+      </td>
+    </tr>`).join('');
+}
+
+// ── RENDER PDFs TABLE ──
+function renderPdfsTable(data) {
+  const tbody = document.getElementById('pdfsTable');
+  if (!data.length) {
+    tbody.innerHTML = `<tr><td colspan="6"><div class="empty"><div class="empty-icon">📄</div><div class="empty-title">No PDFs yet</div><div>Click "Add PDF" to get started</div></div></td></tr>`;
+    return;
+  }
+  tbody.innerHTML = data.map((p, i) => `
+    <tr>
+      <td style="color:var(--muted);font-size:0.78rem;">${i+1}</td>
+      <td>
+        <div class="td-title">${p.title}</div>
+        <div class="td-sub">${p.version || ''}</div>
+      </td>
+      <td><span class="badge badge-${p.subject?.toLowerCase()}">${p.subject || '–'}</span></td>
+      <td style="font-size:0.8rem;">${p.pages ? p.pages + ' pages' : '–'}</td>
+      <td><code style="background:var(--surface);padding:0.2rem 0.5rem;border-radius:5px;font-size:0.72rem;color:var(--accent2);max-width:180px;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${p.fileId || '–'}</code></td>
+      <td>
+        <div class="action-btns">
+          <button class="btn-icon" title="Preview" onclick="window.open('https://drive.google.com/file/d/${p.fileId}/view','_blank')">👁️</button>
+          <button class="btn-icon" title="Edit" onclick="editPdf('${p.id}')">✏️</button>
+          <button class="btn-icon del" title="Delete" onclick="confirmDelete('pdf','${p.id}','${p.title.replace(/'/g,"\\'")}')">🗑️</button>
+        </div>
+      </td>
+    </tr>`).join('');
+}
+
+// ── RECENT TABLE ──
+function renderRecentTable() {
+  const recent = [
+    ...allLectures.map(l => ({ ...l, type: 'video' })),
+    ...allPdfs.map(p => ({ ...p, type: 'pdf' }))
+  ].slice(0, 8);
+  const tbody = document.getElementById('recentTable');
+  if (!recent.length) {
+    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:2rem;">No content added yet</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = recent.map(r => `
+    <tr>
+      <td><div class="td-title">${r.title}</div></td>
+      <td><span class="badge badge-${r.type}">${r.type === 'video' ? '🎬 Lecture' : '📄 PDF'}</span></td>
+      <td><span class="badge badge-${r.subject?.toLowerCase()}">${r.subject || '–'}</span></td>
+      <td style="font-size:0.8rem;color:var(--muted);">${r.chapter || r.version || '–'}</td>
+      <td style="font-size:0.78rem;color:var(--muted);">${r.createdAt?.toDate ? r.createdAt.toDate().toLocaleDateString('en-IN') : 'Just now'}</td>
+    </tr>`).join('');
+}
+
+// ── SAVE LECTURE ──
+window.saveLecture = async () => {
+  const title = document.getElementById('lTitle').value.trim();
+  const subject = document.getElementById('lSubject').value;
+  const duration = document.getElementById('lDuration').value.trim();
+  const chapter = document.getElementById('lChapter').value.trim();
+  const videoId = document.getElementById('lVideoId').value.trim();
+  const description = document.getElementById('lDesc').value.trim();
+  const order = parseInt(document.getElementById('lOrder').value) || 99;
+  const editId = document.getElementById('lectureEditId').value;
+
+  if (!title || !subject || !videoId || !chapter) return showToast('Please fill in all required fields.', 'error');
+
+  const btn = document.getElementById('saveLectureBtn');
+  btn.disabled = true; btn.textContent = 'Saving...';
+
+  const data = { title, subject, duration, chapter, videoId, description, order, createdAt: serverTimestamp() };
+
+  try {
+    if (editId) {
+      await updateDoc(doc(db, 'lectures', editId), { title, subject, duration, chapter, videoId, description, order });
+      showToast('✅ Lecture updated!', 'success');
+    } else {
+      await addDoc(collection(db, 'lectures'), data);
+      showToast('✅ Lecture added!', 'success');
+    }
+    closeModal('lectureModal');
+    await loadLectures();
+    updateStats();
+    renderRecentTable();
+  } catch(e) {
+    showToast('❌ Error saving lecture: ' + e.message, 'error');
+  }
+  btn.disabled = false; btn.textContent = 'Save Lecture';
+};
+
+// ── SAVE PDF ──
+window.savePdf = async () => {
+  const title = document.getElementById('pTitle').value.trim();
+  const subject = document.getElementById('pSubject').value;
+  const fileId = document.getElementById('pFileId').value.trim();
+  const pages = document.getElementById('pPages').value;
+  const version = document.getElementById('pVersion').value.trim();
+  const editId = document.getElementById('pdfEditId').value;
+
+  if (!title || !subject || !fileId) return showToast('Please fill in all required fields.', 'error');
+
+  const btn = document.getElementById('savePdfBtn');
+  btn.disabled = true; btn.textContent = 'Saving...';
+
+  const data = { title, subject, fileId, pages: pages ? parseInt(pages) : null, version, createdAt: serverTimestamp() };
+
+  try {
+    if (editId) {
+      await updateDoc(doc(db, 'pdfs', editId), { title, subject, fileId, pages: pages ? parseInt(pages) : null, version });
+      showToast('✅ PDF updated!', 'success');
+    } else {
+      await addDoc(collection(db, 'pdfs'), data);
+      showToast('✅ PDF added!', 'success');
+    }
+    closeModal('pdfModal');
+    await loadPdfs();
+    updateStats();
+    renderRecentTable();
+  } catch(e) {
+    showToast('❌ Error saving PDF: ' + e.message, 'error');
+  }
+  btn.disabled = false; btn.textContent = 'Save PDF';
+};
+
+// ── EDIT LECTURE ──
+window.editLecture = (id) => {
+  const l = allLectures.find(x => x.id === id);
+  if (!l) return;
+  document.getElementById('lectureModalTitle').textContent = 'Edit Lecture';
+  document.getElementById('lectureEditId').value = id;
+  document.getElementById('lTitle').value = l.title || '';
+  document.getElementById('lSubject').value = l.subject || '';
+  document.getElementById('lDuration').value = l.duration || '';
+  document.getElementById('lChapter').value = l.chapter || '';
+  document.getElementById('lVideoId').value = l.videoId || '';
+  document.getElementById('lDesc').value = l.description || '';
+  document.getElementById('lOrder').value = l.order || '';
+  document.getElementById('saveLectureBtn').textContent = 'Update Lecture';
+  openModal('lectureModal');
+};
+
+// ── EDIT PDF ──
+window.editPdf = (id) => {
+  const p = allPdfs.find(x => x.id === id);
+  if (!p) return;
+  document.getElementById('pdfModalTitle').textContent = 'Edit PDF';
+  document.getElementById('pdfEditId').value = id;
+  document.getElementById('pTitle').value = p.title || '';
+  document.getElementById('pSubject').value = p.subject || '';
+  document.getElementById('pFileId').value = p.fileId || '';
+  document.getElementById('pPages').value = p.pages || '';
+  document.getElementById('pVersion').value = p.version || '';
+  document.getElementById('savePdfBtn').textContent = 'Update PDF';
+  openModal('pdfModal');
+};
+
+// ── DELETE ──
+let deleteTarget = null;
+window.confirmDelete = (type, id, name) => {
+  deleteTarget = { type, id };
+  document.getElementById('confirmMsg').textContent = `Are you sure you want to delete "${name}"? This cannot be undone.`;
+  document.getElementById('confirmDeleteBtn').onclick = doDelete;
+  openModal('confirmModal');
+};
+
+async function doDelete() {
+  if (!deleteTarget) return;
+  const { type, id } = deleteTarget;
+  try {
+    await deleteDoc(doc(db, type === 'lecture' ? 'lectures' : 'pdfs', id));
+    showToast('🗑️ Deleted successfully!', 'success');
+    closeModal('confirmModal');
+    if (type === 'lecture') { await loadLectures(); }
+    else { await loadPdfs(); }
+    updateStats();
+    renderRecentTable();
+  } catch(e) {
+    showToast('❌ Error deleting: ' + e.message, 'error');
+  }
+  deleteTarget = null;
+}
+
+// ── FILTER ──
+window.filterTable = (type, val) => {
+  val = val.toLowerCase();
+  if (type === 'lectures') renderLecturesTable(allLectures.filter(l => l.title?.toLowerCase().includes(val) || l.chapter?.toLowerCase().includes(val)));
+  else renderPdfsTable(allPdfs.filter(p => p.title?.toLowerCase().includes(val)));
+};
+
+window.filterBySubject = (type, val) => {
+  if (type === 'lectures') renderLecturesTable(val ? allLectures.filter(l => l.subject === val) : allLectures);
+  else renderPdfsTable(val ? allPdfs.filter(p => p.subject === val) : allPdfs);
+};
+
+// ── MODAL HELPERS ──
+window.openAddModal = (type) => {
+  if (type === 'lecture') {
+    document.getElementById('lectureModalTitle').textContent = 'Add New Lecture';
+    document.getElementById('lectureEditId').value = '';
+    document.getElementById('lTitle').value = '';
+    document.getElementById('lSubject').value = '';
+    document.getElementById('lDuration').value = '';
+    document.getElementById('lChapter').value = '';
+    document.getElementById('lVideoId').value = '';
+    document.getElementById('lDesc').value = '';
+    document.getElementById('lOrder').value = '';
+    document.getElementById('saveLectureBtn').textContent = 'Save Lecture';
+    openModal('lectureModal');
+  } else {
+    document.getElementById('pdfModalTitle').textContent = 'Add New PDF';
+    document.getElementById('pdfEditId').value = '';
+    document.getElementById('pTitle').value = '';
+    document.getElementById('pSubject').value = '';
+    document.getElementById('pFileId').value = '';
+    document.getElementById('pPages').value = '';
+    document.getElementById('pVersion').value = '';
+    document.getElementById('savePdfBtn').textContent = 'Save PDF';
+    openModal('pdfModal');
+  }
+};
+
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+window.closeModal = (id) => { document.getElementById(id).classList.remove('open'); };
+
+// Close modal on overlay click
+document.querySelectorAll('.modal-overlay').forEach(overlay => {
+  overlay.addEventListener('click', e => { if (e.target === overlay) overlay.classList.remove('open'); });
+});
+
+// Enter key for login
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && document.getElementById('loginScreen').style.display !== 'none') window.doLogin();
+});
+
+// Toast
+function showToast(msg, type = 'success') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = `toast ${type} show`;
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+window.showToast = showToast;
+
+</script>
+
+<script>
+// Panel switching (non-module)
+window.switchPanel = (name, btn) => {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.sb-link').forEach(b => b.classList.remove('active'));
+  document.getElementById('panel-' + name).classList.add('active');
+  if (btn) btn.classList.add('active');
+};
+</script>
+
+</body>
+</html>
