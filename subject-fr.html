@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Financial Reporting – CAFinalPro</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f; --surface: #12121a; --card: #1a1a26; --border: #2a2a3d;
+    --accent: #f97316; --accent2: #fb923c; --text: #f1f1f8; --muted: #8888aa;
+    --gradient: linear-gradient(135deg, #f97316, #ef4444);
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; display: flex; min-height: 100vh; }
+
+  /* SIDEBAR */
+  .sidebar {
+    width: 240px; background: var(--surface); border-right: 1px solid var(--border);
+    display: flex; flex-direction: column; padding: 1.5rem 0; position: fixed;
+    top: 0; left: 0; height: 100vh; z-index: 50;
+  }
+  .sb-logo { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.2rem; padding: 0 1.5rem; margin-bottom: 2rem; text-decoration: none; color: var(--text); display: block; }
+  .sb-logo span { color: var(--accent); }
+  .sb-section { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.1em; color: rgba(136,136,170,0.5); padding: 0 1.5rem; margin: 1rem 0 0.5rem; }
+  .sb-link {
+    display: flex; align-items: center; gap: 0.75rem; padding: 0.65rem 1.5rem;
+    color: var(--muted); text-decoration: none; font-size: 0.88rem; font-weight: 500;
+    transition: all 0.2s; border-left: 2px solid transparent;
+  }
+  .sb-link:hover { color: var(--text); background: rgba(255,255,255,0.04); }
+  .sb-link.active { color: var(--accent); background: rgba(249,115,22,0.08); border-left-color: var(--accent); }
+  .sb-icon { font-size: 1rem; width: 20px; text-align: center; }
+  .sb-bottom { margin-top: auto; padding: 1rem 1.5rem; border-top: 1px solid var(--border); }
+  .sb-user { display: flex; align-items: center; gap: 0.75rem; }
+  .sb-avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--gradient); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.9rem; }
+  .sb-name { font-size: 0.85rem; font-weight: 500; }
+  .sb-email { font-size: 0.72rem; color: var(--muted); }
+  .sb-logout { margin-top: 0.75rem; background: transparent; border: 1px solid var(--border); color: var(--muted); padding: 0.5rem 1rem; border-radius: 8px; cursor: pointer; font-size: 0.8rem; font-family: 'DM Sans', sans-serif; width: 100%; transition: all 0.2s; }
+  .sb-logout:hover { border-color: rgba(239,68,68,0.5); color: #fca5a5; }
+
+  /* MAIN */
+  .main { margin-left: 240px; flex: 1; padding: 2rem 2.5rem; }
+
+  /* SUBJECT HERO */
+  .subject-hero {
+    background: var(--card); border: 1px solid var(--border); border-radius: 20px;
+    padding: 2rem 2.5rem; margin-bottom: 2rem; position: relative; overflow: hidden;
+  }
+  .subject-hero::before {
+    content: ''; position: absolute; right: -60px; top: -60px;
+    width: 250px; height: 250px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(249,115,22,0.12), transparent 70%);
+  }
+  .sh-group { font-size: 0.75rem; color: var(--accent2); font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.5rem; }
+  .sh-title { font-family: 'Syne', sans-serif; font-size: 1.8rem; font-weight: 800; margin-bottom: 0.5rem; }
+  .sh-desc { color: var(--muted); font-size: 0.9rem; line-height: 1.7; max-width: 600px; margin-bottom: 1.5rem; }
+  .sh-meta { display: flex; gap: 2rem; }
+  .sh-meta-item { }
+  .sh-meta-val { font-family: 'Syne', sans-serif; font-size: 1.3rem; font-weight: 700; }
+  .sh-meta-label { font-size: 0.72rem; color: var(--muted); margin-top: 2px; }
+  .sh-progress { margin-top: 1.5rem; }
+  .sh-progress-label { font-size: 0.78rem; color: var(--muted); margin-bottom: 0.5rem; display: flex; justify-content: space-between; }
+  .progress-bar { height: 6px; background: var(--border); border-radius: 3px; }
+  .progress-fill { height: 100%; border-radius: 3px; background: var(--gradient); transition: width 0.5s ease; }
+
+  /* TABS */
+  .tabs { display: flex; gap: 0; border-bottom: 1px solid var(--border); margin-bottom: 2rem; }
+  .tab {
+    padding: 0.75rem 1.5rem; font-size: 0.88rem; font-weight: 500; color: var(--muted);
+    cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px;
+    transition: all 0.2s; background: none; border-top: none; border-left: none; border-right: none;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .tab:hover { color: var(--text); }
+  .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+  /* CONTENT PANELS */
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  /* CHAPTER GROUP */
+  .chapter-section { margin-bottom: 2rem; }
+  .chapter-title {
+    font-family: 'Syne', sans-serif; font-size: 0.85rem; font-weight: 700;
+    color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em;
+    padding: 0.5rem 0; margin-bottom: 0.75rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .lecture-row {
+    display: flex; align-items: center; gap: 1rem;
+    background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+    padding: 1rem 1.25rem; margin-bottom: 0.6rem;
+    cursor: pointer; transition: all 0.2s; text-decoration: none; color: inherit;
+  }
+  .lecture-row:hover { border-color: var(--accent); transform: translateX(4px); }
+  .lecture-row.done { border-color: rgba(34,197,94,0.2); }
+  .lr-num { width: 28px; height: 28px; border-radius: 50%; background: var(--border); display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 600; flex-shrink: 0; color: var(--muted); }
+  .lr-num.done-num { background: rgba(34,197,94,0.15); color: #22c55e; }
+  .lr-title { font-size: 0.9rem; font-weight: 500; flex: 1; }
+  .lr-duration { font-size: 0.75rem; color: var(--muted); flex-shrink: 0; }
+  .lr-play { width: 32px; height: 32px; border-radius: 50%; background: var(--gradient); display: flex; align-items: center; justify-content: center; font-size: 0.7rem; flex-shrink: 0; transition: transform 0.2s; }
+  .lecture-row:hover .lr-play { transform: scale(1.1); }
+
+  /* PDF LIST */
+  .pdf-row {
+    display: flex; align-items: center; gap: 1rem;
+    background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+    padding: 1rem 1.25rem; margin-bottom: 0.6rem;
+    cursor: pointer; transition: all 0.2s; text-decoration: none; color: inherit;
+  }
+  .pdf-row:hover { border-color: var(--accent); }
+  .pdf-icon-box { width: 40px; height: 40px; border-radius: 10px; background: rgba(249,115,22,0.1); display: flex; align-items: center; justify-content: center; font-size: 1.2rem; flex-shrink: 0; }
+  .pdf-info { flex: 1; }
+  .pdf-name { font-size: 0.9rem; font-weight: 500; margin-bottom: 0.2rem; }
+  .pdf-meta { font-size: 0.75rem; color: var(--muted); }
+  .pdf-dl-btn { background: rgba(249,115,22,0.1); border: 1px solid rgba(249,115,22,0.3); color: var(--accent2); padding: 0.4rem 0.9rem; border-radius: 7px; font-size: 0.78rem; font-weight: 500; cursor: pointer; transition: all 0.2s; font-family: 'DM Sans', sans-serif; }
+  .pdf-dl-btn:hover { background: rgba(249,115,22,0.2); }
+
+  @media(max-width:900px) {
+    .sidebar { display: none; }
+    .main { margin-left: 0; padding: 1rem; }
+  }
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <a href="index.html" class="sb-logo">CA<span>Final</span>Pro</a>
+  <ul style="list-style:none">
+    <span class="sb-section">Main</span>
+    <li><a href="dashboard.html" class="sb-link"><span class="sb-icon">🏠</span> Dashboard</a></li>
+    <span class="sb-section">Group 1</span>
+    <li><a href="subject-fr.html" class="sb-link active"><span class="sb-icon">📊</span> Financial Reporting</a></li>
+    <li><a href="subject-afm.html" class="sb-link"><span class="sb-icon">📈</span> Adv. Financial Mgmt</a></li>
+    <li><a href="subject-audit.html" class="sb-link"><span class="sb-icon">🔍</span> Adv. Auditing & Ethics</a></li>
+    <span class="sb-section" style="opacity:0.45;">Group 2 — Coming Soon</span>
+  </ul>
+  <div class="sb-bottom">
+    <div class="sb-user">
+      <div class="sb-avatar" id="avatarInitial">?</div>
+      <div>
+        <div class="sb-name" id="userName">Loading...</div>
+        <div class="sb-email" id="userEmail"></div>
+      </div>
+    </div>
+    <button class="sb-logout" onclick="handleLogout()">Sign Out</button>
+  </div>
+</aside>
+
+<main class="main">
+  <!-- SUBJECT HERO -->
+  <div class="subject-hero">
+    <div class="sh-group">📦 Group 1</div>
+    <div class="sh-title">📊 Financial Reporting (FR)</div>
+    <div class="sh-desc">Master the complete Financial Reporting syllabus including Ind AS standards, consolidation, financial instruments, revenue recognition, and ICAI amendments — through structured expert lectures and detailed PDF notes.</div>
+    <div class="sh-meta">
+      <div class="sh-meta-item">
+        <div class="sh-meta-val" id="totalLectures">0</div>
+        <div class="sh-meta-label">Total Lectures</div>
+      </div>
+      <div class="sh-meta-item">
+        <div class="sh-meta-val" id="watchedLectures">0</div>
+        <div class="sh-meta-label">Watched</div>
+      </div>
+      <div class="sh-meta-item">
+        <div class="sh-meta-val" id="totalPdfs">0</div>
+        <div class="sh-meta-label">PDF Notes</div>
+      </div>
+    </div>
+    <div class="sh-progress">
+      <div class="sh-progress-label"><span>Your Progress</span><span id="progressPct">0%</span></div>
+      <div class="progress-bar"><div class="progress-fill" id="progressBar" style="width:0%"></div></div>
+    </div>
+  </div>
+
+  <!-- TABS -->
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('lectures', this)">🎬 Lectures</button>
+    <button class="tab" onclick="switchTab('pdfs', this)">📄 PDF Notes</button>
+  </div>
+
+  <!-- LECTURES PANEL -->
+  <div class="panel active" id="panel-lectures">
+
+    <!--
+      ========================================================
+      ADMIN: ADD YOUR LECTURES HERE
+      For each lecture, copy one <div class="lecture-row"> block
+      and fill in:
+        - data-video="YOUR_YOUTUBE_VIDEO_ID"
+        - The lecture title
+        - The duration
+      ========================================================
+    -->
+
+    <div class="chapter-section">
+      <div class="chapter-title">Chapter 1 – Conceptual Framework</div>
+
+      <a class="lecture-row" data-video="YOUTUBE_VIDEO_ID" onclick="goWatch(this)">
+        <div class="lr-num">1</div>
+        <div class="lr-title">Conceptual Framework – Introduction & Qualitative Characteristics</div>
+        <div class="lr-duration">⏱ 1h 05m</div>
+        <div class="lr-play">▶</div>
+      </a>
+
+      <a class="lecture-row" data-video="YOUTUBE_VIDEO_ID" onclick="goWatch(this)">
+        <div class="lr-num">2</div>
+        <div class="lr-title">Elements of Financial Statements</div>
+        <div class="lr-duration">⏱ 52m</div>
+        <div class="lr-play">▶</div>
+      </a>
+    </div>
+
+    <div class="chapter-section">
+      <div class="chapter-title">Chapter 2 – Ind AS 116: Leases</div>
+
+      <a class="lecture-row" data-video="YOUTUBE_VIDEO_ID" onclick="goWatch(this)">
+        <div class="lr-num">3</div>
+        <div class="lr-title">Ind AS 116 – Full Chapter (Definition, ROU Asset, Lease Liability)</div>
+        <div class="lr-duration">⏱ 1h 42m</div>
+        <div class="lr-play">▶</div>
+      </a>
+
+      <a class="lecture-row" data-video="YOUTUBE_VIDEO_ID" onclick="goWatch(this)">
+        <div class="lr-num">4</div>
+        <div class="lr-title">Ind AS 116 – Solved Examples & Practice Questions</div>
+        <div class="lr-duration">⏱ 1h 15m</div>
+        <div class="lr-play">▶</div>
+      </a>
+    </div>
+
+    <div class="chapter-section">
+      <div class="chapter-title">Chapter 3 – Revenue Recognition (Ind AS 115)</div>
+
+      <a class="lecture-row" data-video="YOUTUBE_VIDEO_ID" onclick="goWatch(this)">
+        <div class="lr-num">5</div>
+        <div class="lr-title">Ind AS 115 – 5-Step Model & Performance Obligations</div>
+        <div class="lr-duration">⏱ 2h 10m</div>
+        <div class="lr-play">▶</div>
+      </a>
+
+      <a class="lecture-row" data-video="YOUTUBE_VIDEO_ID" onclick="goWatch(this)">
+        <div class="lr-num">6</div>
+        <div class="lr-title">Ind AS 115 – Variable Consideration & Contract Modifications</div>
+        <div class="lr-duration">⏱ 1h 55m</div>
+        <div class="lr-play">▶</div>
+      </a>
+    </div>
+
+    <div class="chapter-section">
+      <div class="chapter-title">Chapter 4 – Financial Instruments (Ind AS 109)</div>
+
+      <a class="lecture-row" data-video="YOUTUBE_VIDEO_ID" onclick="goWatch(this)">
+        <div class="lr-num">7</div>
+        <div class="lr-title">Ind AS 109 – Classification, Measurement & Impairment</div>
+        <div class="lr-duration">⏱ 2h 30m</div>
+        <div class="lr-play">▶</div>
+      </a>
+    </div>
+
+    <!-- ADD MORE CHAPTERS FOLLOWING THE SAME PATTERN -->
+
+  </div>
+
+  <!-- PDF PANEL -->
+  <div class="panel" id="panel-pdfs">
+
+    <!--
+      ========================================================
+      ADMIN: ADD YOUR PDFs HERE
+      Replace GOOGLE_DRIVE_FILE_ID with the ID from your
+      Google Drive share link.
+      ========================================================
+    -->
+
+    <a class="pdf-row" onclick="openPdf(event, 'GOOGLE_DRIVE_FILE_ID')">
+      <div class="pdf-icon-box">📄</div>
+      <div class="pdf-info">
+        <div class="pdf-name">FR – Complete Ind AS Summary Notes</div>
+        <div class="pdf-meta">Updated Nov 2024 · 124 pages</div>
+      </div>
+      <button class="pdf-dl-btn">⬇ Download</button>
+    </a>
+
+    <a class="pdf-row" onclick="openPdf(event, 'GOOGLE_DRIVE_FILE_ID')">
+      <div class="pdf-icon-box">📄</div>
+      <div class="pdf-info">
+        <div class="pdf-name">FR – Ind AS 116 Leases – Chapter Notes</div>
+        <div class="pdf-meta">Updated Oct 2024 · 38 pages</div>
+      </div>
+      <button class="pdf-dl-btn">⬇ Download</button>
+    </a>
+
+    <a class="pdf-row" onclick="openPdf(event, 'GOOGLE_DRIVE_FILE_ID')">
+      <div class="pdf-icon-box">📄</div>
+      <div class="pdf-info">
+        <div class="pdf-name">FR – Ind AS 115 Revenue Recognition Notes</div>
+        <div class="pdf-meta">Updated Oct 2024 · 52 pages</div>
+      </div>
+      <button class="pdf-dl-btn">⬇ Download</button>
+    </a>
+
+    <a class="pdf-row" onclick="openPdf(event, 'GOOGLE_DRIVE_FILE_ID')">
+      <div class="pdf-icon-box">📄</div>
+      <div class="pdf-info">
+        <div class="pdf-name">FR – Financial Instruments (Ind AS 109) Notes</div>
+        <div class="pdf-meta">Updated Nov 2024 · 68 pages</div>
+      </div>
+      <button class="pdf-dl-btn">⬇ Download</button>
+    </a>
+
+    <a class="pdf-row" onclick="openPdf(event, 'GOOGLE_DRIVE_FILE_ID')">
+      <div class="pdf-icon-box">📄</div>
+      <div class="pdf-info">
+        <div class="pdf-name">FR – ICAI Amendment Notes 2024-25</div>
+        <div class="pdf-meta">Updated Jan 2025 · 44 pages</div>
+      </div>
+      <button class="pdf-dl-btn">⬇ Download</button>
+    </a>
+
+    <!-- ADD MORE PDFs FOLLOWING THE SAME PATTERN -->
+
+  </div>
+</main>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
+  import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
+
+  // ⚠️ REPLACE WITH YOUR FIREBASE CONFIG
+  const firebaseConfig = {
+    apiKey: "YOUR_API_KEY",
+    authDomain: "YOUR_PROJECT.firebaseapp.com",
+    projectId: "YOUR_PROJECT_ID",
+    storageBucket: "YOUR_PROJECT.appspot.com",
+    messagingSenderId: "YOUR_SENDER_ID",
+    appId: "YOUR_APP_ID"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+
+  onAuthStateChanged(auth, user => {
+    if (!user) { window.location.href = 'login.html'; return; }
+    const name = user.displayName || user.email.split('@')[0];
+    document.getElementById('userName').textContent = name;
+    document.getElementById('userEmail').textContent = user.email;
+    document.getElementById('avatarInitial').textContent = name.charAt(0).toUpperCase();
+  });
+
+  window.handleLogout = async () => {
+    await signOut(auth);
+    window.location.href = 'index.html';
+  };
+</script>
+
+<script>
+  // Count lectures & update stats
+  window.addEventListener('DOMContentLoaded', () => {
+    const rows = document.querySelectorAll('.lecture-row');
+    const done = document.querySelectorAll('.lecture-row.done');
+    const pdfs = document.querySelectorAll('.pdf-row');
+    const pct = rows.length ? Math.round((done.length / rows.length) * 100) : 0;
+    document.getElementById('totalLectures').textContent = rows.length;
+    document.getElementById('watchedLectures').textContent = done.length;
+    document.getElementById('totalPdfs').textContent = pdfs.length;
+    document.getElementById('progressPct').textContent = pct + '%';
+    document.getElementById('progressBar').style.width = pct + '%';
+  });
+
+  function switchTab(name, btn) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('panel-' + name).classList.add('active');
+  }
+  window.switchTab = switchTab;
+
+  window.goWatch = (el) => {
+    const videoId = el.getAttribute('data-video');
+    const title = el.querySelector('.lr-title').textContent;
+    // Pass video info to watch page via URL params
+    const params = new URLSearchParams({ v: videoId, t: title, s: 'FR' });
+    window.location.href = 'watch.html?' + params.toString();
+  };
+
+  window.openPdf = (e, fileId) => {
+    e.preventDefault();
+    if (!fileId || fileId === 'GOOGLE_DRIVE_FILE_ID') {
+      alert('Admin: Replace GOOGLE_DRIVE_FILE_ID with your actual Google Drive file ID.');
+      return;
+    }
+    window.open('https://drive.google.com/file/d/' + fileId + '/view', '_blank');
+  };
+</script>
+
+</body>
+</html>
